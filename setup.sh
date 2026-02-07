@@ -46,11 +46,23 @@ if [[ "$SHELL" != *"/fish" ]]; then
     fi
 fi
 
-# 4. Install Fisher (plugin manager)
+# 4. Backup and install Fish config
+echo "📝 Setting up Fish configuration..."
+FISH_CONFIG="$HOME/.config/fish"
+if [ -d "$FISH_CONFIG" ]; then
+    echo "Backing up existing Fish config..."
+    cp -r "$FISH_CONFIG" "$FISH_CONFIG.bak"
+fi
+mkdir -p "$FISH_CONFIG"
+echo "Downloading Fish config files..."
+wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/config.fish -O "$FISH_CONFIG/config.fish"
+wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/fish_variables -O "$FISH_CONFIG/fish_variables"
+
+# 5. Install Fisher (plugin manager)
 echo "🎣 Installing Fisher..."
 fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 
-# 5. Install Fish plugins
+# 6. Install Fish plugins
 echo "🧩 Installing Fish plugins..."
 fish -c "fisher install PatrickF1/fzf.fish"
 fish -c "fisher install jethrokuan/z"
@@ -61,7 +73,7 @@ fish -c "fisher install acomagu/fish-async-prompt"
 fish -c "fisher install gazorby/fish-abbreviation-tips"
 fish -c "fisher install IlanCosman/tide@v6"
 
-# 6. Install Kitty
+# 7. Install Kitty
 echo "🐱 Installing Kitty..."
 if ! command -v kitty &> /dev/null; then
     curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
@@ -69,7 +81,18 @@ else
     echo "✅ Kitty already installed."
 fi
 
-# 7. Install Neovim
+# 8. Backup and install Kitty config
+echo "📝 Setting up Kitty configuration..."
+KITTY_CONFIG="$HOME/.config/kitty"
+if [ -d "$KITTY_CONFIG" ]; then
+    echo "Backing up existing Kitty config..."
+    cp -r "$KITTY_CONFIG" "$KITTY_CONFIG.bak"
+fi
+mkdir -p "$KITTY_CONFIG"
+echo "Downloading Kitty config file..."
+wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/kitty.conf -O "$KITTY_CONFIG/kitty.conf"
+
+# 9. Install Neovim
 echo "🌚 Installing Neovim..."
 if ! command -v nvim &> /dev/null; then
     brew install neovim

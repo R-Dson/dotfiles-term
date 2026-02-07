@@ -27,24 +27,45 @@ The script will:
 1. Check for Homebrew (prompt to install if missing)
 2. Install Fish shell
 3. Set Fish as your default shell
-4. Install Fisher plugin manager
-5. Install Fish plugins (fzf, z, done, gitnow, puffer-fish, fish-async-prompt, fish-abbreviation-tips, tide)
-6. Install Kitty terminal
-7. Install Neovim
+4. Install Fish configuration (config.fish, fish_variables)
+5. Install Fisher plugin manager
+6. Install Fish plugins (fzf, z, done, gitnow, puffer-fish, fish-async-prompt, fish-abbreviation-tips, tide)
+7. Install Kitty terminal
+8. Install Kitty configuration (kitty.conf)
+9. Install Neovim
 
 Once the process is complete, restart your terminal to use Fish.
 
 ## Configuration
 
-The Fish configuration is located in `fish/config.fish`. It includes:
+The configuration files are managed as follows:
+
+### Fish Shell (`fish/config.fish`)
 
 - **Path settings**: Multiple binary directories added to PATH
 - **Editor**: Neovim set as default editor
+- **Secret environment variables**: Loads `~/.config/fish/fish_env.fish` if it exists (for API keys, tokens, etc. - not tracked in git)
 - **Tide prompt**: Auto-configured with Lean style and true color
 - **Aliases**: Common commands (ls, git, navigation, etc.)
 - **fzf**: Fuzzy finder integration
 - **History**: 10,000 lines of history
 - **Less colors**: Colorized man pages
+
+### Kitty Terminal (`kitty/kitty.conf`)
+
+The Kitty configuration is automatically downloaded and installed to `~/.config/kitty/kitty.conf`. Customize font, colors, key bindings, and terminal behavior there.
+
+## Secret Environment Variables
+
+To set private environment variables (API keys, tokens, etc.), create a file at `~/.config/fish/fish_env.fish`:
+
+```fish
+# Example: ~/.config/fish/fish_env.fish
+set -gx MY_API_KEY "your-secret-key-here"
+set -gx ANOTHER_SECRET "another-secret"
+```
+
+This file is automatically loaded if it exists, but won't be tracked in version control.
 
 ## File Structure
 
