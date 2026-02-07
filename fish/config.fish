@@ -18,12 +18,6 @@ if test -f "$fish_env_file"
     source "$fish_env_file"
 end
 
-# Tide prompt (run this to configure: tide configure)
-if status --is-interactive && not set -q _tide_once
-    tide configure --auto --style=Lean --prompt_colors='True color' --show_time='24-hour format' --lean_prompt_height='One line' --prompt_spacing=Compact --icons='Few icons' --transient=No
-    set -gx _tide_once
-end
-
 # Directory name length
 set -gx fish_prompt_pwd_dir_length 1
 

@@ -52,28 +52,37 @@ FISH_CONFIG="$HOME/.config/fish"
 if [ -d "$FISH_CONFIG" ]; then
     echo "Backing up existing Fish config..."
     cp -r "$FISH_CONFIG" "$FISH_CONFIG.bak"
+    echo "Removing old Fish config for clean install..."
+    rm -rf "$FISH_CONFIG"
 fi
 mkdir -p "$FISH_CONFIG"
 echo "Downloading Fish config files..."
 wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/config.fish -O "$FISH_CONFIG/config.fish"
-wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/fish_variables -O "$FISH_CONFIG/fish_variables"
+wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/fish_variables -O "$FISH_CONFIG/fish_variables" 2>/dev/null || true
 
 # 5. Install Fisher (plugin manager)
 echo "🎣 Installing Fisher..."
 fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 
-# 6. Install Fish plugins
-echo "🧩 Installing Fish plugins..."
-fish -c "fisher install PatrickF1/fzf.fish"
-fish -c "fisher install jethrokuan/z"
-fish -c "fisher install franciscolourenco/done"
-fish -c "fisher install joseluisq/gitnow"
-fish -c "fisher install nickeb96/puffer-fish"
-fish -c "fisher install acomagu/fish-async-prompt"
-fish -c "fisher install gazorby/fish-abbreviation-tips"
-fish -c "fisher install IlanCosman/tide@v6"
+# 6. Clean up old Fisher plugins (preserve Fisher itself)
+echo "🧹 Cleaning up old Fisher plugins..."
+rm -rf "$FISH_CONFIG/functions/_"* "$FISH_CONFIG/conf.d/"* 2>/dev/null || true
 
-# 7. Install Kitty
+# 7. Install Fish plugins
+echo "🧩 Installing Fish plugins..."
+fish << 'EOF'
+source ~/.config/fish/functions/fisher.fish
+fisher install PatrickF1/fzf.fish
+fisher install jethrokuan/z
+fisher install franciscolourenco/done
+fisher install joseluisq/gitnow
+fisher install nickeb96/puffer-fish
+fisher install acomagu/fish-async-prompt
+fisher install gazorby/fish-abbreviation-tips
+fisher install IlanCosman/tide@v6
+EOF
+
+# 8. Install Kitty
 echo "🐱 Installing Kitty..."
 if ! command -v kitty &> /dev/null; then
     curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
@@ -81,7 +90,7 @@ else
     echo "✅ Kitty already installed."
 fi
 
-# 8. Backup and install Kitty config
+# 9. Backup and install Kitty config
 echo "📝 Setting up Kitty configuration..."
 KITTY_CONFIG="$HOME/.config/kitty"
 if [ -d "$KITTY_CONFIG" ]; then
@@ -92,7 +101,7 @@ mkdir -p "$KITTY_CONFIG"
 echo "Downloading Kitty config file..."
 wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/kitty.conf -O "$KITTY_CONFIG/kitty.conf"
 
-# 9. Install Neovim
+# 10. Install Neovim
 echo "🌚 Installing Neovim..."
 if ! command -v nvim &> /dev/null; then
     brew install neovim
@@ -100,7 +109,7 @@ else
     echo "✅ Neovim already installed."
 fi
 
-# 10. Backup and install Neovim config
+# 11. Backup and install Neovim config
 echo "📝 Setting up Neovim configuration..."
 NVIM_CONFIG="$HOME/.config/nvim"
 if [ -d "$NVIM_CONFIG" ]; then
@@ -112,3 +121,5 @@ echo "Downloading Neovim config file..."
 wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/nvim/init.lua -O "$NVIM_CONFIG/init.lua"
 
 echo "🎉 Setup complete! Restart your terminal to use Fish."
+echo ""
+echo "💡 To customize the Tide prompt, run: tide configure"

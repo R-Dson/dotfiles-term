@@ -29,11 +29,12 @@ The script will:
 3. Set Fish as your default shell
 4. Install Fish configuration (config.fish, fish_variables)
 5. Install Fisher plugin manager
-6. Install Fish plugins (fzf, z, done, gitnow, puffer-fish, fish-async-prompt, fish-abbreviation-tips, tide)
-7. Install Kitty terminal
-8. Install Kitty configuration (kitty.conf)
-9. Install Neovim
-10. Install Neovim configuration (init.lua)
+6. Clean up old Fisher plugins (prevents conflicts)
+7. Install Fish plugins (fzf, z, done, gitnow, puffer-fish, fish-async-prompt, fish-abbreviation-tips, tide)
+8. Install Kitty terminal
+9. Install Kitty configuration (kitty.conf)
+10. Install Neovim
+11. Install Neovim configuration (init.lua)
 
 Once the process is complete, restart your terminal to use Fish.
 
@@ -46,7 +47,7 @@ The configuration files are managed as follows:
 - **Path settings**: Multiple binary directories added to PATH
 - **Editor**: Neovim set as default editor
 - **Secret environment variables**: Loads `~/.config/fish/fish_env.fish` if it exists (for API keys, tokens, etc. - not tracked in git)
-- **Tide prompt**: Auto-configured with Lean style and true color
+- **Tide prompt**: Installed with default settings (run `tide configure` to customize)
 - **Aliases**: Common commands (ls, git, navigation, etc.)
 - **fzf**: Fuzzy finder integration
 - **History**: 10,000 lines of history
@@ -95,7 +96,7 @@ This file is automatically loaded if it exists, but won't be tracked in version 
 
 ## Customization
 
-To customize Tide prompt, run:
+To customize the Tide prompt theme, run:
 ```fish
 tide configure
 ```
