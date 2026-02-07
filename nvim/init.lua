@@ -222,9 +222,9 @@ require('mini.completion').setup({
   },
 })
 
--- Accept completion with Ctrl+Enter - copilot takes priority
+-- Accept completion with Shift+Tab - copilot takes priority
 -- For LSP completion, use <C-y>
-vim.keymap.set('i', '<C-CR>', 'copilot#Accept("<CR>")', { expr = true, silent = true, desc = 'Copilot accept' })
+vim.keymap.set('i', '<S-Tab>', 'copilot#Accept("<CR>")', { expr = true, silent = true, desc = 'Copilot accept' })
 
 -- See :help which-key.nvim-which-key-setup
 require('which-key').setup({
