@@ -35,17 +35,23 @@ end
 # Directory name length
 set -gx fish_prompt_pwd_dir_length 1
 
-# fzf key bindings
-if type -q fzf
-    fzf --fish | source
+# LS_COLORS for file type colors (Linux)
+if [ -f ~/.dircolors ]
+    set -gx LS_COLORS (cat ~/.dircolors)
+else
+    # Default LS_COLORS if no dircolors file
+    set -gx LS_COLORS "di=34:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;46:tw=30;42:ow=34;42:st=37:sg=30;43"
 end
 
-# Aliases
-alias ls "ls -p -G"
-alias la "ls -A"
-alias ll "ls -lah"
-alias lla "ll -A"
-alias l "ls -CF"
+# Colors for ls (cross-platform)
+if type -q dircolors
+    eval (dircolors -c ~/.dircolors)
+end
+alias ls "ls --color=auto -p"
+alias la "ls -A --color=auto"
+alias ll "ls -lah --color=auto"
+alias lla "ll -A --color=auto"
+alias l "ls --color=auto -CF"
 alias grep "grep --color=auto"
 alias fgrep "fgrep --color=auto"
 alias egrep "egrep --color=auto"
@@ -64,6 +70,11 @@ alias gco "git checkout"
 alias nv "nvim"
 alias v "nvim"
 alias tmx "tmux -u new"
+
+# fzf key bindings
+if type -q fzf
+    fzf --fish | source
+end
 
 # History
 set -gx HISTSIZE 10000
