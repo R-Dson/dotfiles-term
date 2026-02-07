@@ -1,70 +1,67 @@
 #!/bin/bash
 
-# Sources:
-# https://scottspence.com/posts/my-updated-zsh-config-2025
-
 # Stop on error
 set -e
 
-echo "🚀 Starting ZSH environment setup..."
+echo "🚀 Starting environment setup..."
 
 # 1. Check for Homebrew and install if missing
 if ! command -v brew &> /dev/null; then
-    echo "🍺 Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Add brew to path for the current session
-    eval "$(/opt/homebrew/bin/brew shellenv)" || eval "$(/usr/local/bin/brew shellenv)"
+    echo "❌ Homebrew not found."
+    read -p "Do you want to install Homebrew? (y/n): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "🍺 Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # Add brew to path for the current session
+        eval "$(/opt/homebrew/bin/brew shellenv)" || eval "$(/usr/local/bin/brew shellenv)"
+    else
+        echo "❌ Homebrew is required for this setup. Exiting."
+        exit 1
+    fi
 else
     echo "✅ Homebrew already installed."
 fi
 
-# 2. Install Zsh via Brew
-echo "🐚 Installing Zsh..."
-brew install zsh
-
-# 3. Install Oh My Zsh (Unattended)
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo "oh-my-zsh Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+# 2. Install Fish via Brew
+echo "🐟 Installing Fish..."
+if ! command -v fish &> /dev/null; then
+    brew install fish
 else
-    echo "✅ Oh My Zsh already installed."
+    echo "✅ Fish already installed."
 fi
 
-# Define custom plugin/theme directory
-ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
-
-# 4. Install Plugins
-echo "🧩 Installing plugins..."
-# zsh-autosuggestions
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+# 3. Set Fish as default shell
+if [[ "$SHELL" != *"/fish" ]]; then
+    echo "🔧 Changing default shell to fish..."
+    # Add fish to /etc/shells if it's not there
+    if ! grep -q "$(which fish)" /etc/shells; then
+        echo "Adding fish to /etc/shells..."
+        echo "$(which fish)" | sudo tee -a /etc/shells
+    fi
+    if command -v chsh &> /dev/null; then
+        chsh -s "$(which fish)"
+    else
+        echo "⚠️  chsh not available. To set Fish as default shell, run: chsh -s $(which fish)"
+    fi
 fi
 
-# zsh-syntax-highlighting
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-fi
+# 4. Install Fisher (plugin manager)
+echo "🎣 Installing Fisher..."
+fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
 
-# 5. Install Spaceship Theme
-echo "🎨 Installing Spaceship Theme..."
-if [ ! -d "$ZSH_CUSTOM/themes/spaceship-prompt" ]; then
-    git clone https://github.com/spaceship-prompt/spaceship-prompt.git "$ZSH_CUSTOM/themes/spaceship-prompt" --depth=1
-    ln -sf "$ZSH_CUSTOM/themes/spaceship-prompt/spaceship.zsh-theme" "$ZSH_CUSTOM/themes/spaceship.zsh-theme"
-fi
+# 5. Install Fish plugins
+echo "🧩 Installing Fish plugins..."
+fish -c "fisher install PatrickF1/fzf.fish"
+fish -c "fisher install jethrokuan/z"
+fish -c "fisher install franciscolourenco/done"
+fish -c "fisher install joseluisq/gitnow"
+fish -c "fisher install nickeb96/puffer-fish"
+fish -c "fisher install acomagu/fish-async-prompt"
+fish -c "fisher install gazorby/fish-abbreviation-tips"
+fish -c "fisher install IlanCosman/tide@v6"
 
-# 6. Create .zsh_aliases if it doesn't exist (to prevent errors)
-if [ ! -f "$HOME/.zsh_aliases" ]; then
-    echo "📝 Creating empty .zsh_aliases file..."
-    touch "$HOME/.zsh_aliases"
-fi
-
-# 7. Set ZSH as default shell
-if [ "$SHELL" != "$(which zsh)" ]; then
-    echo "🔧 Changing default shell to zsh..."
-    chsh -s "$(which zsh)"
-fi
-
-# 8. Install Kitty
+# 6. Install Kitty
 echo "🐱 Installing Kitty..."
 if ! command -v kitty &> /dev/null; then
     curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
@@ -72,8 +69,12 @@ else
     echo "✅ Kitty already installed."
 fi
 
-# 9. Install Neovim
+# 7. Install Neovim
 echo "🌚 Installing Neovim..."
-brew install neovim
+if ! command -v nvim &> /dev/null; then
+    brew install neovim
+else
+    echo "✅ Neovim already installed."
+fi
 
-echo "🎉 Setup complete! Restart your terminal or run 'source ~/.zshrc'"
+echo "🎉 Setup complete! Restart your terminal to use Fish."
