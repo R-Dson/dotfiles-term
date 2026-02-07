@@ -36,17 +36,11 @@ end
 set -gx fish_prompt_pwd_dir_length 1
 
 # LS_COLORS for file type colors (Linux)
-if [ -f ~/.dircolors ]
-    set -gx LS_COLORS (cat ~/.dircolors)
-else
-    # Default LS_COLORS if no dircolors file
-    set -gx LS_COLORS "di=34:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;46:tw=30;42:ow=34;42:st=37:sg=30;43"
-end
+# Simple format: type=color (e.g., di=01;34 for bold blue directories)
+# Attributes: 00=none, 01=bold, 04=underline, 05=blink, 07=reverse
+set -gx LS_COLORS "di=01;34:ln=01;36:ex=01;31:su=01;32:pi=40;33:so=01;35:bd=40;33:01;34:cd=40;33:01;34:tw=01;35:ow=01;34:st=01;37:sg=01;30:*.txt=00;32:*.md=00;32"
 
-# Colors for ls (cross-platform)
-if type -q dircolors
-    eval (dircolors -c ~/.dircolors)
-end
+# Aliases with --color=auto
 alias ls "ls --color=auto -p"
 alias la "ls -A --color=auto"
 alias ll "ls -lah --color=auto"
