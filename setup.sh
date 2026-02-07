@@ -100,4 +100,15 @@ else
     echo "✅ Neovim already installed."
 fi
 
+# 10. Backup and install Neovim config
+echo "📝 Setting up Neovim configuration..."
+NVIM_CONFIG="$HOME/.config/nvim"
+if [ -d "$NVIM_CONFIG" ]; then
+    echo "Backing up existing Neovim config..."
+    cp -r "$NVIM_CONFIG" "$NVIM_CONFIG.bak"
+fi
+mkdir -p "$NVIM_CONFIG"
+echo "Downloading Neovim config file..."
+wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/nvim/init.lua -O "$NVIM_CONFIG/init.lua"
+
 echo "🎉 Setup complete! Restart your terminal to use Fish."

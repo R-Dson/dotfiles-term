@@ -33,6 +33,7 @@ The script will:
 7. Install Kitty terminal
 8. Install Kitty configuration (kitty.conf)
 9. Install Neovim
+10. Install Neovim configuration (init.lua)
 
 Once the process is complete, restart your terminal to use Fish.
 
@@ -54,6 +55,10 @@ The configuration files are managed as follows:
 ### Kitty Terminal (`kitty/kitty.conf`)
 
 The Kitty configuration is automatically downloaded and installed to `~/.config/kitty/kitty.conf`. Customize font, colors, key bindings, and terminal behavior there.
+
+### Neovim Editor (`nvim/init.lua`)
+
+The Neovim configuration is automatically downloaded and installed to `~/.config/nvim/init.lua`. Customize your editor settings, key mappings, plugins, and Lua configuration there.
 
 ## Secret Environment Variables
 
