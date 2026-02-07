@@ -35,10 +35,11 @@ end
 # Directory name length
 set -gx fish_prompt_pwd_dir_length 1
 
-# LS_COLORS for file type colors (Linux)
-# Simple format: type=color (e.g., di=01;34 for bold blue directories)
-# Attributes: 00=none, 01=bold, 04=underline, 05=blink, 07=reverse
-set -gx LS_COLORS "di=01;34:ln=01;36:ex=01;31:su=01;32:pi=40;33:so=01;35:bd=40;33:01;34:cd=40;33:01;34:tw=01;35:ow=01;34:st=01;37:sg=01;30:*.txt=00;32:*.md=00;32"
+# dircolors for ls colors (standard Linux approach)
+if type -q dircolors
+    # Generate LS_COLORS using dircolors (no custom file needed)
+    eval (dircolors -c)
+end
 
 # Aliases with --color=auto
 alias ls "ls --color=auto -p"
