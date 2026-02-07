@@ -1,3 +1,17 @@
+# Set locale (must be first to prevent UTF-8 issues)
+set -gx LANG en_US.UTF-8
+set -gx LC_ALL en_US.UTF-8
+
+# Configure Tide prompt (runs once)
+if status --is-interactive && not set -q _tide_once
+    tide configure --auto --style=Classic --prompt_colors='True color' --classic_prompt_color=Dark --show_time=No --classic_prompt_separators=Angled --powerline_prompt_heads=Sharp --powerline_prompt_tails=Flat --powerline_prompt_style='One line' --prompt_spacing=Sparse --icons='Few icons' --transient=No
+    set -gx _tide_once
+end
+
+# Disable fish-async-prompt (causes issues with locale/async loading)
+# Set to 1 to enable if your system handles async prompts correctly
+set -g async_prompt_enable 0
+
 # Paths
 fish_add_path /opt/brew/bin
 set -gx PATH $HOME/.local/bin $PATH
@@ -54,10 +68,6 @@ alias tmx "tmux -u new"
 # History
 set -gx HISTSIZE 10000
 set -gx SAVEHIST 10000
-
-# Set locale
-set -gx LANG en_US.UTF-8
-set -gx LC_ALL en_US.UTF-8
 
 # Less colors
 set -gx LESS_TERMCAP_mb (printf "\e[1;31m")

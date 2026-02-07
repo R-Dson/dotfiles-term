@@ -9,8 +9,8 @@ The setup script handles the installation and configuration of several tools to 
 - Homebrew: The package manager.
 - Fish: A user-friendly and feature-rich shell.
 - Fisher: A plugin manager for Fish.
-- Tide: A modern and customizable Fish prompt theme.
-- Plugins: fzf (fuzzy finder), z (jump directories), done (smart command confirmation), gitnow (git utilities), puffer-fish (abbreviations), fish-async-prompt (async prompt loading), fish-abbreviation-tips (abbreviation suggestions).
+- Fonts: Maple Mono NF Nerd Font (for Kitty terminal).
+- Plugins: fzf (fuzzy finder), z (jump directories), done (smart command confirmation), gitnow (git utilities), puffer-fish (abbreviations), fish-async-prompt (async prompt loading, disabled by default), Tide (modern prompt theme).
 - Kitty: A fast, feature-rich GPU-accelerated terminal emulator.
 - Neovim: A modern, extensible text editor.
 
@@ -26,36 +26,38 @@ chmod +x setup.sh
 The script will:
 1. Check for Homebrew (prompt to install if missing)
 2. Install Fish shell
-3. Set Fish as your default shell
-4. Install Fish configuration (config.fish, fish_variables)
-5. Install Fisher plugin manager
-6. Clean up old Fisher plugins (prevents conflicts)
-7. Install Fish plugins (fzf, z, done, gitnow, puffer-fish, fish-async-prompt, fish-abbreviation-tips, tide)
+3. Install Maple Mono NF font (for Kitty terminal)
+4. Note: Run `chsh -s $(which fish)` to set Fish as default shell
+5. Install Fish configuration (from local fish/config.fish)
+6. Install Fisher plugin manager
+7. Install Fish plugins (including Tide configured in config.fish)
 8. Install Kitty terminal
-9. Install Kitty configuration (kitty.conf)
+9. Install Kitty configuration (from local kitty/kitty.conf)
 10. Install Neovim
-11. Install Neovim configuration (init.lua)
+11. Install Neovim configuration (from local nvim/init.lua)
 
 Once the process is complete, restart your terminal to use Fish.
 
 ## Configuration
 
-The configuration files are managed as follows:
+### Fish Shell
 
-### Fish Shell (`fish/config.fish`)
+The Fish configuration is installed from `fish/config.fish` to `~/.config/fish/config.fish`. It includes:
 
-- **Path settings**: Multiple binary directories added to PATH
+- **Locale**: UTF-8 locale (en_US.UTF-8) set at the top to prevent encoding issues
+- **Tide prompt**: Auto-configured with Classic style, Dark color, True color, Angled separators (runs once on startup)
+- **Paths**: Multiple binary directories added to PATH
 - **Editor**: Neovim set as default editor
 - **Secret environment variables**: Loads `~/.config/fish/fish_env.fish` if it exists (for API keys, tokens, etc. - not tracked in git)
-- **Tide prompt**: Installed with default settings (run `tide configure` to customize)
 - **Aliases**: Common commands (ls, git, navigation, etc.)
+- **fish-async-prompt**: Disabled by default (`async_prompt_enable=0`) due to locale/async issues. Enable with `set -g async_prompt_enable 1`
 - **fzf**: Fuzzy finder integration
 - **History**: 10,000 lines of history
 - **Less colors**: Colorized man pages
 
 ### Kitty Terminal (`kitty/kitty.conf`)
 
-The Kitty configuration is automatically downloaded and installed to `~/.config/kitty/kitty.conf`. Customize font, colors, key bindings, and terminal behavior there.
+The Kitty configuration is automatically downloaded and installed to `~/.config/kitty/kitty.conf`. It uses the Maple Mono NF Nerd Font (installed via Homebrew). Customize font, colors, key bindings, and terminal behavior there.
 
 ### Neovim Editor (`nvim/init.lua`)
 
@@ -73,32 +75,27 @@ set -gx ANOTHER_SECRET "another-secret"
 
 This file is automatically loaded if it exists, but won't be tracked in version control.
 
-## File Structure
-
-```
-.
-├── setup.sh          # Installation script
-├── fish/
-│   └── config.fish   # Fish shell configuration
-└── README.md         # This file
-```
-
 ## Plugins Included
 
+- **IlanCosman/tide@v6**: Modern prompt theme with Classic style
 - **PatrickF1/fzf.fish**: fzf key bindings and integrations
 - **jethrokuan/z**: Directory jumping
 - **franciscolourenco/done**: Smart command confirmation
 - **joseluisq/gitnow**: Git utilities
 - **nickeb96/puffer-fish**: Fish abbreviations
-- **acomagu/fish-async-prompt**: Asynchronous prompt loading
+- **acomagu/fish-async-prompt**: Asynchronous prompt loading (disabled by default, enable with `set -g async_prompt_enable 1`)
 - **gazorby/fish-abbreviation-tips**: Abbreviation suggestions
-- **IlanCosman/tide@v6**: Modern prompt theme
 
 ## Customization
 
-To customize the Tide prompt theme, run:
+To reconfigure Tide prompt with different settings, run:
 ```fish
 tide configure
+```
+
+To enable fish-async-prompt (disabled by default), run:
+```fish
+set -g async_prompt_enable 1
 ```
 
 To add more Fisher plugins:
@@ -107,3 +104,4 @@ fisher install <plugin-name>
 ```
 
 Edit `fish/config.fish` to add your own aliases, functions, and environment variables.
+

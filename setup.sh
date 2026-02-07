@@ -13,7 +13,7 @@ if ! command -v brew &> /dev/null; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "🍺 Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        # Add brew to path for the current session
+        # Add brew to path for current session
         eval "$(/opt/homebrew/bin/brew shellenv)" || eval "$(/usr/local/bin/brew shellenv)"
     else
         echo "❌ Homebrew is required for this setup. Exiting."
@@ -31,47 +31,46 @@ else
     echo "✅ Fish already installed."
 fi
 
-# 3. Set Fish as default shell
-if [[ "$SHELL" != *"/fish" ]]; then
-    echo "🔧 Changing default shell to fish..."
-    # Add fish to /etc/shells if it's not there
-    if ! grep -q "$(which fish)" /etc/shells; then
-        echo "Adding fish to /etc/shells..."
-        echo "$(which fish)" | sudo tee -a /etc/shells
-    fi
-    if command -v chsh &> /dev/null; then
-        chsh -s "$(which fish)"
-    else
-        echo "⚠️  chsh not available. To set Fish as default shell, run: chsh -s $(which fish)"
-    fi
-fi
+# 3. Install Fonts
+echo "🔤 Installing Fonts..."
+brew install --cask font-maple-mono-nf
+echo "✅ Fonts installed"
 
-# 4. Backup and install Fish config
+# 4. Set Fish as default shell (optional)
+echo "ℹ️  To set Fish as default shell, run: chsh -s $(which fish)"
+
+# 5. Backup and install Fish config
 echo "📝 Setting up Fish configuration..."
 FISH_CONFIG="$HOME/.config/fish"
 if [ -d "$FISH_CONFIG" ]; then
     echo "Backing up existing Fish config..."
-    cp -r "$FISH_CONFIG" "$FISH_CONFIG.bak"
-    echo "Removing old Fish config for clean install..."
-    rm -rf "$FISH_CONFIG"
+    cp -r "$FISH_CONFIG" "$FISH_CONFIG.bak" 2>/dev/null || true
+    # Remove old config files and plugins for clean install
+    rm -rf "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions" 2>/dev/null || true
+    rm -f "$FISH_CONFIG/config.fish" "$FISH_CONFIG/fish_variables" "$FISH_CONFIG/fish_plugins" 2>/dev/null || true
 fi
-mkdir -p "$FISH_CONFIG"
-echo "Downloading Fish config files..."
-wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/config.fish -O "$FISH_CONFIG/config.fish"
-wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/fish_variables -O "$FISH_CONFIG/fish_variables" 2>/dev/null || true
+# Create directories
+if ! mkdir -p "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions" 2>/dev/null; then
+    echo "❌ Cannot create Fish config directory at $FISH_CONFIG"
+    echo "   This is likely due to permission issues."
+    exit 1
+fi
+echo "Downloading Fish config file..."
+if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/config.fish -o "$FISH_CONFIG/config.fish"; then
+    echo "❌ Failed to download Fish config"
+    exit 1
+fi
+echo "✅ Fish configuration installed"
 
-# 5. Install Fisher (plugin manager)
+# 6. Install Fisher (plugin manager)
 echo "🎣 Installing Fisher..."
 fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-
-# 6. Clean up old Fisher plugins (preserve Fisher itself)
-echo "🧹 Cleaning up old Fisher plugins..."
-rm -rf "$FISH_CONFIG/functions/_"* "$FISH_CONFIG/conf.d/"* 2>/dev/null || true
 
 # 7. Install Fish plugins
 echo "🧩 Installing Fish plugins..."
 fish << 'EOF'
 source ~/.config/fish/functions/fisher.fish
+fisher install IlanCosman/tide@v6
 fisher install PatrickF1/fzf.fish
 fisher install jethrokuan/z
 fisher install franciscolourenco/done
@@ -79,8 +78,8 @@ fisher install joseluisq/gitnow
 fisher install nickeb96/puffer-fish
 fisher install acomagu/fish-async-prompt
 fisher install gazorby/fish-abbreviation-tips
-fisher install IlanCosman/tide@v6
 EOF
+echo "✅ All Fish plugins installed (Tide auto-configured in config.fish)"
 
 # 8. Install Kitty
 echo "🐱 Installing Kitty..."
@@ -95,13 +94,20 @@ echo "📝 Setting up Kitty configuration..."
 KITTY_CONFIG="$HOME/.config/kitty"
 if [ -d "$KITTY_CONFIG" ]; then
     echo "Backing up existing Kitty config..."
-    cp -r "$KITTY_CONFIG" "$KITTY_CONFIG.bak"
+    cp -r "$KITTY_CONFIG" "$KITTY_CONFIG.bak" 2>/dev/null || true
 fi
-mkdir -p "$KITTY_CONFIG"
+if ! mkdir -p "$KITTY_CONFIG" 2>/dev/null; then
+    echo "❌ Cannot create Kitty config directory at $KITTY_CONFIG"
+    exit 1
+fi
 echo "Downloading Kitty config file..."
-wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/kitty.conf -O "$KITTY_CONFIG/kitty.conf"
+if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/kitty.conf -o "$KITTY_CONFIG/kitty.conf"; then
+    echo "❌ Failed to download Kitty config"
+    exit 1
+fi
+echo "✅ Kitty configuration installed"
 
-# 10. Install Neovim
+# 9. Install Neovim
 echo "🌚 Installing Neovim..."
 if ! command -v nvim &> /dev/null; then
     brew install neovim
@@ -109,17 +115,22 @@ else
     echo "✅ Neovim already installed."
 fi
 
-# 11. Backup and install Neovim config
+# 10. Backup and install Neovim config
 echo "📝 Setting up Neovim configuration..."
 NVIM_CONFIG="$HOME/.config/nvim"
 if [ -d "$NVIM_CONFIG" ]; then
     echo "Backing up existing Neovim config..."
-    cp -r "$NVIM_CONFIG" "$NVIM_CONFIG.bak"
+    cp -r "$NVIM_CONFIG" "$NVIM_CONFIG.bak" 2>/dev/null || true
 fi
-mkdir -p "$NVIM_CONFIG"
+if ! mkdir -p "$NVIM_CONFIG" 2>/dev/null; then
+    echo "❌ Cannot create Neovim config directory at $NVIM_CONFIG"
+    exit 1
+fi
 echo "Downloading Neovim config file..."
-wget -q https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/nvim/init.lua -O "$NVIM_CONFIG/init.lua"
+if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/nvim/init.lua -o "$NVIM_CONFIG/init.lua"; then
+    echo "❌ Failed to download Neovim config"
+    exit 1
+fi
+echo "✅ Neovim configuration installed"
 
 echo "🎉 Setup complete! Restart your terminal to use Fish."
-echo ""
-echo "💡 To customize the Tide prompt, run: tide configure"
