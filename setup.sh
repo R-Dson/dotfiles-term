@@ -105,6 +105,10 @@ if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/m
     echo "❌ Failed to download Kitty config"
     exit 1
 fi
+if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/theme.conf -o "$KITTY_CONFIG/theme.conf"; then
+    echo "❌ Failed to download Kitty theme config"
+    exit 1
+fi
 echo "✅ Kitty configuration installed"
 
 # 9. Install Neovim
