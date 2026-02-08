@@ -7,6 +7,7 @@
 -- https://vonheikemen.github.io/devlog/tools/build-your-first-lua-config-for-neovim/
 
 vim.lsp.enable('lua_ls')
+vim.lsp.enable('pyright')
 
 vim.lsp.config('ty', {
   settings = {
