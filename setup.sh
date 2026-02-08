@@ -119,7 +119,42 @@ else
     echo "✅ Neovim already installed."
 fi
 
-# 10. Backup and install Neovim config
+# 10. Install VS Code Codicons for Neovim
+echo "📦 Installing VS Code Codicons..."
+if ! command -v npm &> /dev/null; then
+    brew install npm
+fi
+npm i @vscode/codicons
+echo "✅ VS Code Codicons installed"
+
+# 11. Install pyright (LSP server for Python)
+echo "🐍 Installing pyright..."
+if ! command -v pyright &> /dev/null; then
+    brew install pyright
+    echo "✅ pyright installed"
+else
+    echo "✅ pyright already installed."
+fi
+
+# 12. Install uv (Python package manager)
+echo "🐍 Installing uv..."
+if ! command -v uv &> /dev/null; then
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+else
+    echo "✅ uv already installed."
+fi
+
+# 13. Install uv tools
+echo "🛠️  Installing uv tools..."
+if command -v uv &> /dev/null; then
+    uv tool install ruff@latest
+    uv tool install ty@latest
+    echo "✅ uv tools installed"
+else
+    echo "⚠️  Skipping uv tools installation (uv not found)"
+fi
+
+# 15. Backup and install Neovim config
 echo "📝 Setting up Neovim configuration..."
 NVIM_CONFIG="$HOME/.config/nvim"
 if [ -d "$NVIM_CONFIG" ]; then

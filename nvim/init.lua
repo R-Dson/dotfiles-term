@@ -7,7 +7,21 @@
 -- https://vonheikemen.github.io/devlog/tools/build-your-first-lua-config-for-neovim/
 
 vim.lsp.enable('lua_ls')
-vim.lsp.enable('pyright')
+
+vim.lsp.config('ty', {
+  settings = {
+    ty = {
+      -- ty language server settings
+    }
+  }
+})
+vim.lsp.enable('ty')
+
+vim.lsp.config('ruff', {
+  settings = {
+  }
+})
+vim.lsp.enable('ruff')
 
 vim.o.number = true
 vim.o.ignorecase = true
@@ -81,17 +95,19 @@ MiniDeps.add('miikanissi/modus-themes.nvim')
 MiniDeps.add('slugbyte/lackluster.nvim')
 MiniDeps.add('github/copilot.vim')
 MiniDeps.add('NickvanDyke/opencode.nvim')
-
--- Copilot keymap
-vim.g.copilot_no_tab_map = true
+MiniDeps.add('romus204/referencer.nvim')
+MiniDeps.add('Dan7h3x/signup.nvim')
 MiniDeps.add('folke/snacks.nvim')
 MiniDeps.add('folke/which-key.nvim')
 MiniDeps.add('VonHeikemen/ts-enable.nvim')
 MiniDeps.add('neovim/nvim-lspconfig')
 MiniDeps.add('nvim-lua/plenary.nvim')
+MiniDeps.add('onsails/lspkind.nvim')
 MiniDeps.add('nvim-tree/nvim-web-devicons')
 MiniDeps.add('MunifTanjim/nui.nvim')
+
 MiniDeps.add('lewis6991/gitsigns.nvim')
+MiniDeps.add('stevearc/aerial.nvim')
 MiniDeps.add({
   source = 'nvim-neo-tree/neo-tree.nvim',
   checkout = 'main',
@@ -127,13 +143,24 @@ vim.o.autoread = true
 -- Modus themes configuration (default theme)
 local modusThemes = require('modus-themes')
 modusThemes.setup({
+  style = 'modus_vivendi',
   transparent = false,
   dim_inactive = false,
+  line_nr_column_background = false,
+  sign_column_background = false,
   styles = {
-    transparency = false,
-    sidebars = 'default',
-    floats = 'default',
+    comments = { italic = true },
+    keywords = { italic = true },
+    functions = { italic = true },
+    variables = {},
   },
+  on_colors = function(colors)
+    colors.bg_main = '#121212'
+    colors.bg_dim = '#1a1a1a'
+    colors.bg_status_line_active = '#2a2a2a'
+    colors.comment = '#989898'
+    colors.fg_inactive = '#bfc0c4'
+  end,
 })
 
 -- Apply modus theme by default
@@ -167,6 +194,17 @@ require('mini.notify').setup({
   lsp_progress = {enable = false},
 })
 
+-- Aerial setup (code outline)
+require('aerial').setup({
+  -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+  on_attach = function(bufnr)
+    -- Jump forwards/backwards with '{' and '}'
+    vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', {buffer = bufnr})
+    vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', {buffer = bufnr})
+  end,
+})
+vim.keymap.set('n', '<leader>fm', '<cmd>AerialToggle!<CR>', {desc = 'Toggle code outline'})
+
 -- See :help MiniBufremove.config
 require('mini.bufremove').setup({})
 
@@ -186,7 +224,6 @@ vim.keymap.set('n', '<leader>gg', '<cmd>Neotree git_status toggle<CR>', {desc = 
 
 -- Git diff
 vim.keymap.set('n', '<leader>gd', '<cmd>Gitsigns diffthis<CR>', {desc = 'Git diff this'})
-vim.keymap.set('n', '<leader>gp', '<cmd>Gitsigns preview_hunk<CR>', {desc = 'Preview git hunk'})
 
 -- See :help MiniPick.config
 require('mini.pick').setup({})
@@ -239,10 +276,38 @@ require('which-key').setup({
   },
 })
 
+require('referencer').setup({
+  enable = true,
+  format = ' [%d ref]',
+  show_no_reference = false,
+  kinds = {5, 6, 8, 12, 13, 14, 23},
+  hl_group = 'Comment',
+  virt_text_pos = 'eol',
+})
+
+require('signup').setup({
+  silent = true,
+  active_parameter = true,
+  active_parameter_colors = {
+    bg = '#86e1fc',
+    fg = '#1a1a1a',
+  },
+  border = 'rounded',
+  winblend = 10,
+  auto_close = true,
+  trigger_chars = {'(', ',', ')'},
+  max_height = 10,
+  max_width = 40,
+  floating_window_above_cur_line = true,
+  debounce_time = 50,
+})
+
 require('which-key').add({
   {'<leader>f', group = 'Fuzzy Find'},
   {'<leader>b', group = 'Buffer'},
   {'<leader>w', group = 'Window'},
+  {'<leader>r', group = 'References'},
+  {'<leader>g', group = 'Git'},
 })
 
 -- Buffer navigation
@@ -310,9 +375,9 @@ require('gitsigns').setup({
       end
     end, { desc = 'Jump to previous git [c]hange' })
 
-    map('n', '<leader>hp', gitsigns.preview_hunk, { desc = 'Git [p]review hunk' })
-    map('n', '<leader>hb', gitsigns.blame_line, { desc = 'Git [b]lame line' })
-    map('n', '<leader>hd', gitsigns.diffthis, { desc = 'Git [d]iff against index' })
+    map('n', '<leader>gp', gitsigns.preview_hunk, { desc = 'Git [p]review hunk' })
+    map('n', '<leader>gb', gitsigns.blame_line, { desc = 'Git [b]lame line' })
+    map('n', '<leader>gi', gitsigns.diffthis, { desc = 'Git [i]ndex diff' })
   end,
 })
 
@@ -329,6 +394,11 @@ vim.g.ts_enable = {
 }
 
 -- LSP setup
+require('lspkind').init({
+  mode = 'symbol_text',
+  preset = 'codicons',
+})
+
 vim.api.nvim_create_autocmd('LspAttach', {
   desc = 'LSP actions',
   callback = function(event)
@@ -336,6 +406,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
     vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
     vim.keymap.set('n', 'grd', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+    vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
     vim.keymap.set({'n', 'x'}, 'gq', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
 
     local id = vim.tbl_get(event, 'data', 'client_id')
@@ -344,13 +415,35 @@ vim.api.nvim_create_autocmd('LspAttach', {
     if client and client:supports_method('textDocument/completion') then
       vim.bo[event.buf].omnifunc = 'v:lua.MiniCompletion.completefunc_lsp'
     end
+
+    -- Enable native Inlay Hints if the LSP server supports them (e.g., ty, rust_analyzer)
+    if client and client:supports_method('textDocument/inlayHint') then
+      vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
+    end
   end,
 })
 
 -- LSP Diagnostics keybinds
-vim.keymap.set('n', '<C-d>', '<cmd>lua vim.diagnostic.goto_next()<cr>', {desc = 'Next diagnostic'})
-vim.keymap.set('n', '<S-C-d>', '<cmd>lua vim.diagnostic.goto_prev()<cr>', {desc = 'Previous diagnostic'})
+vim.keymap.set('n', '<C-d>', '<cmd>lua vim.diagnostic.jump({count=1})<cr>', {desc = 'Next diagnostic'})
+vim.keymap.set('n', '<S-C-d>', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic'})
 vim.keymap.set('n', '<leader>d', '<cmd>lua vim.diagnostic.show()<cr>', {desc = 'Show diagnostics in buffer'})
 vim.keymap.set('n', '<leader>da', '<cmd>lua vim.diagnostic.open_float()<cr>', {desc = 'Show diagnostics as popup'})
-vim.keymap.set('n', '<leader>dw', '<cmd>lua vim.diagnostic.show_win()<cr>', {desc = 'Show diagnostics in window'})
+vim.keymap.set('n', '<leader>dw', '<cmd>lua vim.diagnostic.open_float({scope="buffer"})<cr>', {desc = 'Show diagnostics in window'})
 vim.keymap.set('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<cr>', {desc = 'Show diagnostics in quickfix'})
+
+-- Standard diagnostic navigation
+vim.keymap.set('n', 'n', '<cmd>lua vim.diagnostic.jump({count=1})<cr>', {desc = 'Next diagnostic line', noremap = true})
+vim.keymap.set('n', 'N', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic line', noremap = true})
+
+-- Automatically show diagnostics on current line in floating window
+vim.api.nvim_create_autocmd('CursorMoved', {
+  pattern = {'*'},
+  callback = function()
+    vim.diagnostic.open_float({scope = 'line'})
+  end,
+})
+
+-- Rename across files (F2 like VSCode)
+vim.keymap.set({'n', 'x'}, '<F2>', function()
+  vim.lsp.buf.rename()
+end, {desc = 'Rename symbol'})
