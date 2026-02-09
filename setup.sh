@@ -131,7 +131,10 @@ if ! mkdir -p "$OPCODE_CONFIG" 2>/dev/null; then
     exit 1
 fi
 echo "Copying opencode config file..."
-cp opencode/opencode.jsonc "$OPCODE_CONFIG/opencode.jsonc"
+if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/opencode/opencode.jsonc -o "$OPCODE_CONFIG/opencode.jsonc"; then
+    echo "❌ Failed to download opencode config"
+    exit 1
+fi
 echo "✅ opencode configuration installed"
 
 # 17. Install Neovim
