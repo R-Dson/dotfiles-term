@@ -111,7 +111,15 @@ if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/m
 fi
 echo "✅ Kitty configuration installed"
 
-# 14. Install opencode config
+# 14. Install opencode CLI
+echo "🤖 Installing opencode CLI..."
+if ! command -v opencode &> /dev/null; then
+    curl -fsSL https://opencode.ai/install | bash
+else
+    echo "✅ opencode already installed."
+fi
+
+# 15. Install opencode config
 echo "🤖 Setting up opencode configuration..."
 OPCODE_CONFIG="$HOME/.config/opencode"
 if [ -d "$OPCODE_CONFIG" ]; then
@@ -126,7 +134,7 @@ echo "Copying opencode config file..."
 cp opencode/opencode.jsonc "$OPCODE_CONFIG/opencode.jsonc"
 echo "✅ opencode configuration installed"
 
-# 15. Install Neovim
+# 17. Install Neovim
 echo "🌚 Installing Neovim..."
 if ! command -v nvim &> /dev/null; then
     brew install neovim
@@ -134,15 +142,19 @@ else
     echo "✅ Neovim already installed."
 fi
 
-# 16. Install VS Code Codicons for Neovim
-echo "📦 Installing VS Code Codicons..."
+# 18. Check for npm (required for Neovim plugins)
+echo "📦 Checking for npm..."
 if ! command -v npm &> /dev/null; then
-    brew install npm
+    echo "❌ npm required for Neovim plugins (copilot.vim, nvim-web-devicons)"
+    echo "   Please install npm first, then run this script again."
+    exit 1
 fi
+echo "✅ npm already installed."
+echo "📦 Installing VS Code Codicons..."
 npm i @vscode/codicons
 echo "✅ VS Code Codicons installed"
 
-# 17. Install pyright (LSP server for Python)
+# 19. Install pyright (LSP server for Python)
 echo "🐍 Installing pyright..."
 if ! command -v pyright &> /dev/null; then
     brew install pyright
@@ -151,7 +163,7 @@ else
     echo "✅ pyright already installed."
 fi
 
-# 18. Install uv (Python package manager)
+# 20. Install uv (Python package manager)
 echo "🐍 Installing uv..."
 if ! command -v uv &> /dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -159,7 +171,7 @@ else
     echo "✅ uv already installed."
 fi
 
-# 19. Install uv tools
+# 21. Install uv tools
 echo "🛠️  Installing uv tools..."
 if command -v uv &> /dev/null; then
     uv tool install ruff@latest
@@ -169,7 +181,7 @@ else
     echo "⚠️  Skipping uv tools installation (uv not found)"
 fi
 
-# 20. Backup and install Neovim config
+# 22. Backup and install Neovim config
 echo "📝 Setting up Neovim configuration..."
 NVIM_CONFIG="$HOME/.config/nvim"
 if [ -d "$NVIM_CONFIG" ]; then
