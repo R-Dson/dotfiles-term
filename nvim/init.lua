@@ -106,6 +106,10 @@ MiniDeps.add('nvim-lua/plenary.nvim')
 MiniDeps.add('onsails/lspkind.nvim')
 MiniDeps.add('nvim-tree/nvim-web-devicons')
 MiniDeps.add('MunifTanjim/nui.nvim')
+MiniDeps.add('saghen/blink.cmp')
+MiniDeps.add('akinsho/toggleterm.nvim')
+MiniDeps.add('folke/todo-comments.nvim')
+MiniDeps.add('brenton-leighton/multiple-cursors.nvim')
 
 MiniDeps.add('lewis6991/gitsigns.nvim')
 MiniDeps.add('sindrets/diffview.nvim')
@@ -308,6 +312,37 @@ require('signup').setup({
   debounce_time = 50,
 })
 
+-- todo-comments: Highlight TODO, FIXME, NOTE, etc.
+require("todo-comments").setup({})
+
+-- multiple-cursors: Like VSCode multiple cursors
+require("multiple-cursors").setup({})
+
+-- Keymaps for multiple cursors (VSCode-like)
+vim.keymap.set({"n", "x"}, "<C-M-j>", "<cmd>MultipleCursorsAddDown<CR>", {desc = "Add cursor down (VSCode: Ctrl+Alt+Down)"})
+vim.keymap.set({"n", "x"}, "<C-M-k>", "<cmd>MultipleCursorsAddUp<CR>", {desc = "Add cursor up (VSCode: Ctrl+Alt+Up)"})
+
+-- blink.cmp: Modern completion plugin
+require("blink.cmp").setup({
+  keymap = { preset = "super-tab" },
+  appearance = {
+    use_nvim_cmp_as_default = true,
+    nerd_font_variant = "mono",
+  },
+  fuzzy = {
+    implementation = "lua",
+  },
+})
+
+-- toggleterm: Floating terminal
+require("toggleterm").setup({
+  direction = "float",
+  float_opts = { border = "curved" },
+  open_mapping = [[<space>t]],
+})
+
+vim.keymap.set("n", "<space>t", "<cmd>ToggleTerm<CR>", {desc = "Toggle floating terminal"})
+
 require('which-key').add({
   {'<leader>f', group = 'Fuzzy Find'},
   {'<leader>b', group = 'Buffer'},
@@ -439,7 +474,7 @@ vim.keymap.set('n', '<leader>dp', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>'
 vim.keymap.set('n', 'n', 'n', {desc = 'Next search match'})
 vim.keymap.set('n', 'N', 'N', {desc = 'Previous search match'})
 vim.keymap.set('n', '<C-d>', '<cmd>lua vim.diagnostic.jump({count=1})<cr>', {desc = 'Next diagnostic'})
-vim.keymap.set('n', '<S-C-d>', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic'})
+vim.keymap.set('n', '<C-S-d>', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic'})
 vim.keymap.set('n', '<leader>dd', '<cmd>lua vim.diagnostic.show()<cr>', {desc = 'Show diagnostics in buffer'})
 vim.keymap.set('n', '<leader>da', '<cmd>lua vim.diagnostic.open_float()<cr>', {desc = 'Show diagnostics as popup'})
 vim.keymap.set('n', '<leader>dw', '<cmd>lua vim.diagnostic.open_float({scope="buffer"})<cr>', {desc = 'Show diagnostics in window'})
