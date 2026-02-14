@@ -108,6 +108,7 @@ MiniDeps.add('nvim-tree/nvim-web-devicons')
 MiniDeps.add('MunifTanjim/nui.nvim')
 
 MiniDeps.add('lewis6991/gitsigns.nvim')
+MiniDeps.add('sindrets/diffview.nvim')
 MiniDeps.add('stevearc/aerial.nvim')
 MiniDeps.add({
   source = 'nvim-neo-tree/neo-tree.nvim',
@@ -224,7 +225,9 @@ vim.keymap.set('n', '<leader>e', '<cmd>Neotree filesystem toggle<CR>', {desc = '
 vim.keymap.set('n', '<leader>gg', '<cmd>Neotree git_status toggle<CR>', {desc = 'Git status'})
 
 -- Git diff
-vim.keymap.set('n', '<leader>gd', '<cmd>Gitsigns diffthis<CR>', {desc = 'Git diff this'})
+vim.keymap.set('n', '<leader>gd', '<cmd>DiffviewOpen<CR>', {desc = 'Open git diff view'})
+vim.keymap.set('n', '<leader>gq', '<cmd>DiffviewClose<CR>', {desc = 'Close git diff view'})
+vim.keymap.set('n', '<leader>gs', function() require('snacks').picker.git_status() end, {desc = 'Git status picker'})
 
 -- See :help MiniPick.config
 require('mini.pick').setup({})
@@ -235,6 +238,8 @@ require('mini.pick').setup({})
 vim.keymap.set('n', '<leader>?', '<cmd>Pick oldfiles<cr>', {desc = 'Search file history'})
 vim.keymap.set('n', '<leader><space>', '<cmd>Pick buffers<cr>', {desc = 'Search open files'})
 vim.keymap.set('n', '<leader>ff', '<cmd>Pick files<cr>', {desc = 'Search all files'})
+vim.keymap.set('n', '<C-p>', '<cmd>Pick files<cr>', {desc = 'Search files'})
+vim.keymap.set('n', '<C-S-p>', '<cmd>Pick commands<cr>', {desc = 'Command palette'})
 vim.keymap.set('n', '<leader>fg', '<cmd>Pick grep_live<cr>', {desc = 'Search in project'})
 vim.keymap.set('n', '<leader>fd', '<cmd>Pick diagnostic<cr>', {desc = 'Search diagnostics'})
 vim.keymap.set('n', '<leader>fs', '<cmd>Pick buf_lines<cr>', {desc = 'Buffer local search'})
@@ -309,6 +314,7 @@ require('which-key').add({
   {'<leader>w', group = 'Window'},
   {'<leader>r', group = 'References'},
   {'<leader>g', group = 'Git'},
+  {'<leader>d', group = 'Diagnostics'},
 })
 
 -- Buffer navigation
@@ -351,6 +357,7 @@ require('neo-tree').setup({
 
 -- Gitsigns setup
 require('gitsigns').setup({
+  linehl = true,
   on_attach = function(bufnr)
     local gitsigns = require('gitsigns')
 
@@ -379,6 +386,8 @@ require('gitsigns').setup({
     map('n', '<leader>gp', gitsigns.preview_hunk, { desc = 'Git [p]review hunk' })
     map('n', '<leader>gb', gitsigns.blame_line, { desc = 'Git [b]lame line' })
     map('n', '<leader>gi', gitsigns.diffthis, { desc = 'Git [i]ndex diff' })
+    map('n', '<leader>gl', gitsigns.toggle_linehl, { desc = 'Git toggle [l]ine highlights' })
+    map('n', '<leader>gh', gitsigns.toggle_deleted, { desc = 'Git toggle deleted [h]ighlights' })
   end,
 })
 
@@ -425,16 +434,16 @@ vim.api.nvim_create_autocmd('LspAttach', {
 })
 
 -- LSP Diagnostics keybinds
+vim.keymap.set('n', '<leader>dn', '<cmd>lua vim.diagnostic.jump({count=1})<cr>', {desc = 'Next diagnostic'})
+vim.keymap.set('n', '<leader>dp', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic'})
+vim.keymap.set('n', 'n', 'n', {desc = 'Next search match'})
+vim.keymap.set('n', 'N', 'N', {desc = 'Previous search match'})
 vim.keymap.set('n', '<C-d>', '<cmd>lua vim.diagnostic.jump({count=1})<cr>', {desc = 'Next diagnostic'})
 vim.keymap.set('n', '<S-C-d>', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic'})
-vim.keymap.set('n', '<leader>d', '<cmd>lua vim.diagnostic.show()<cr>', {desc = 'Show diagnostics in buffer'})
+vim.keymap.set('n', '<leader>dd', '<cmd>lua vim.diagnostic.show()<cr>', {desc = 'Show diagnostics in buffer'})
 vim.keymap.set('n', '<leader>da', '<cmd>lua vim.diagnostic.open_float()<cr>', {desc = 'Show diagnostics as popup'})
 vim.keymap.set('n', '<leader>dw', '<cmd>lua vim.diagnostic.open_float({scope="buffer"})<cr>', {desc = 'Show diagnostics in window'})
 vim.keymap.set('n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<cr>', {desc = 'Show diagnostics in quickfix'})
-
--- Standard diagnostic navigation
-vim.keymap.set('n', 'n', '<cmd>lua vim.diagnostic.jump({count=1})<cr>', {desc = 'Next diagnostic line', noremap = true})
-vim.keymap.set('n', 'N', '<cmd>lua vim.diagnostic.jump({count=-1})<cr>', {desc = 'Previous diagnostic line', noremap = true})
 
 -- Automatically show diagnostics on current line in floating window
 vim.api.nvim_create_autocmd('CursorMoved', {
