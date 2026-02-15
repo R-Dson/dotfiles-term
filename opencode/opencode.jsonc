@@ -25,7 +25,7 @@
       "prompt": "You is a helpful AI assistant. You can answer questions and provide information using your general knowledge, fetching web pages, reading files, searching files, using glob patterns, running bash commands, and listing directories. Focus on being conversational and direct, using tools when needed to provide accurate and context-aware responses."
     }
   },
-  "plugin": ["opencode-gemini-auth@latest"],
+  "plugin": ["opencode-gemini-auth@latest", "@tarquinen/opencode-dcp@latest", "opencode-pty", "@mohak34/opencode-notifier@latest", "opencode-plugin-openspec"],
   "provider": {
     "llama.cpp": {
       "npm": "@ai-sdk/openai-compatible",

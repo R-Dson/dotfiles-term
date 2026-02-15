@@ -137,6 +137,16 @@ if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/m
 fi
 echo "✅ opencode configuration installed"
 
+# 16. Install opencode skills
+echo "🧠 Installing opencode skills..."
+OPCODE_SKILLS="$HOME/.config/opencode/skills"
+mkdir -p "$OPCODE_SKILLS/karpathy-guidelines"
+if ! curl -s https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/refs/heads/main/skills/karpathy-guidelines/SKILL.md -o "$OPCODE_SKILLS/karpathy-guidelines/SKILL.md"; then
+    echo "❌ Failed to download karpathy-guidelines skill"
+else
+    echo "✅ karpathy-guidelines skill installed"
+fi
+
 # 17. Install Neovim
 echo "🌚 Installing Neovim..."
 if ! command -v nvim &> /dev/null; then
@@ -184,7 +194,12 @@ else
     echo "⚠️  Skipping uv tools installation (uv not found)"
 fi
 
-# 22. Backup and install Neovim config
+# 22. Install OpenSpec
+echo "🔍 Installing OpenSpec..."
+npm install -g @fission-ai/openspec@latest
+echo "✅ OpenSpec installed"
+
+# 23. Backup and install Neovim config
 echo "📝 Setting up Neovim configuration..."
 NVIM_CONFIG="$HOME/.config/nvim"
 if [ -d "$NVIM_CONFIG" ]; then

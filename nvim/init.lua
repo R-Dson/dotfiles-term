@@ -95,7 +95,7 @@ MiniDeps.add('bluz71/vim-moonfly-colors')
 MiniDeps.add('miikanissi/modus-themes.nvim')
 MiniDeps.add('slugbyte/lackluster.nvim')
 MiniDeps.add('github/copilot.vim')
-MiniDeps.add('NickvanDyke/opencode.nvim')
+MiniDeps.add('sudo-tee/opencode.nvim')
 MiniDeps.add('romus204/referencer.nvim')
 MiniDeps.add('Dan7h3x/signup.nvim')
 MiniDeps.add('folke/snacks.nvim')
@@ -107,6 +107,7 @@ MiniDeps.add('onsails/lspkind.nvim')
 MiniDeps.add('nvim-tree/nvim-web-devicons')
 MiniDeps.add('MunifTanjim/nui.nvim')
 MiniDeps.add('saghen/blink.cmp')
+MiniDeps.add('MeanderingProgrammer/render-markdown.nvim')
 MiniDeps.add('akinsho/toggleterm.nvim')
 MiniDeps.add('folke/todo-comments.nvim')
 MiniDeps.add('brenton-leighton/multiple-cursors.nvim')
@@ -137,14 +138,37 @@ MiniDeps.add({
 -- ========================================================================== --
 
 -- See :help opencode.nvim
-vim.g.opencode_opts = {
-  provider = {
-    enabled = "snacks",
-  },
-}
+-- Note: Plugin uses default keymaps (all <leader>o... prefix)
+vim.schedule(function()
+  pcall(function()
+    require('opencode').setup({
+      default_global_keymaps = true,
+      keymap_prefix = '<leader>o',
+      preferred_picker = 'snacks',
+      preferred_completion = 'blink',
+    })
+  end)
+end)
 
--- Required for `opts.events.reload`.
+-- Required for opts.events.reload
 vim.o.autoread = true
+
+-- Configure render-markdown
+vim.schedule(function()
+  pcall(function()
+    require('render-markdown').setup({
+      anti_conceal = { enabled = false },
+      file_types = { 'markdown', 'opencode_output' },
+    })
+
+    vim.api.nvim_create_autocmd('FileType', {
+      pattern = { 'markdown', 'Avante', 'copilot-chat', 'opencode_output' },
+      callback = function()
+        require('render-markdown').enable()
+      end,
+    })
+  end)
+end)
 
 -- Modus themes configuration (default theme)
 local modusThemes = require('modus-themes')
@@ -171,22 +195,6 @@ modusThemes.setup({
 
 -- Apply modus theme by default
 vim.cmd('colorscheme modus')
-
--- Recommended/example keymaps.
-vim.keymap.set({ "n", "x" }, "<C-a>", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-vim.keymap.set({ "n", "x" }, "<C-x>", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
-vim.keymap.set({ "n", "t" }, "<leader>.", function() require("opencode").toggle() end,                         { desc = "Toggle opencode" })
-
-vim.keymap.set({ "n", "x" }, "go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
-vim.keymap.set("n",          "goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
-
-vim.keymap.set("n", "<S-C-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "Scroll opencode up" })
-vim.keymap.set("n", "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Scroll opencode down" })
-
--- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o…".
-vim.keymap.set("n", "+", "<C-a>", { desc = "Increment under cursor", noremap = true })
-vim.keymap.set("n", "-", "<C-x>", { desc = "Decrement under cursor", noremap = true })
 
 -- See :help MiniIcons.config
 -- Change style to 'glyph' if you have a font with fancy icons
