@@ -1,0 +1,34 @@
+{
+	"providers": {
+    "z.ai": {
+      "baseUrl": "https://api.z.ai/api/coding/paas/v4",
+      "api": "openai-completions",
+      "apiKey": "ANTHROPIC_AUTH_TOKEN",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+          "id": "glm-5-turbo",
+          "reasoning": true
+        }
+      ]
+    },
+		"llama-server": {
+      "baseUrl": "http://localhost:8080/v1",
+      "api": "openai-completions",
+      "apiKey": "ANTHROPIC_AUTH_TOKEN",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": false
+      },
+      "models": [
+        {
+					"id": "gemma-4-31B:IQ4_XS",
+          "reasoning": true
+        }
+      ]
+		}
+  }
+}
