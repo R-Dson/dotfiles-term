@@ -1,0 +1,7 @@
+/.pi/**/auth.json
+/.pi/**/update-cache.json
+
+/.pi/**/bin/
+/.pi/**/extensions/
+/.pi/**/sessions/
+/.pi/**/themes/
