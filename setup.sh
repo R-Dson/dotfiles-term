@@ -1,73 +1,97 @@
 #!/bin/bash
 
-# Stop on error
 set -e
 
-echo "🚀 Starting environment setup..."
+# ─────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────
 
-# 1. Check for Homebrew and install if missing
-if ! command -v brew &> /dev/null; then
-    echo "❌ Homebrew not found."
-    read -p "Do you want to install Homebrew? (y/n): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "🍺 Installing Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        # Add brew to path for current session
-        eval "$(/opt/homebrew/bin/brew shellenv)" || eval "$(/usr/local/bin/brew shellenv)"
-    else
-        echo "❌ Homebrew is required for this setup. Exiting."
+info()    { echo "ℹ️  $*"; }
+success() { echo "✅ $*"; }
+error()   { echo "❌ $*" >&2; }
+step()    { echo; echo "── $* ──────────────────────────────"; }
+
+is_macos() { [[ "$(uname -s)" == "Darwin" ]]; }
+
+download() {
+    local url="$1" dest="$2"
+    if ! curl -fsSL "$url" -o "$dest"; then
+        error "Failed to download: $url"
         exit 1
     fi
-else
-    echo "✅ Homebrew already installed."
+}
+
+backup_and_prepare() {
+    local dir="$1"
+    if [ -d "$dir" ]; then
+        cp -r "$dir" "${dir}.bak" 2>/dev/null || true
+    fi
+    mkdir -p "$dir" || { error "Cannot create directory: $dir"; exit 1; }
+}
+
+DOTFILES="https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma"
+DOTFILES_REPO="https://github.com/R-Dson/dotfiles-term"
+DOTFILES_BRANCH="main-oma"
+
+# ─────────────────────────────────────────────
+# Homebrew
+# ─────────────────────────────────────────────
+
+step "Homebrew"
+if ! command -v brew &>/dev/null; then
+    read -p "Homebrew not found. Install it? (y/n): " -n 1 -r; echo
+    [[ $REPLY =~ ^[Yy]$ ]] || { error "Homebrew is required. Exiting."; exit 1; }
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Activate brew for the current session (Apple Silicon, Intel, Linux)
+    if   [ -x "/opt/homebrew/bin/brew" ];              then eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [ -x "/usr/local/bin/brew" ];                 then eval "$(/usr/local/bin/brew shellenv)"
+    elif [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    else error "Homebrew installed but brew binary not found in expected locations."; exit 1
+    fi
 fi
+success "Homebrew ready"
 
-# 2. Install Fish via Brew
-echo "🐟 Installing Fish..."
-if ! command -v fish &> /dev/null; then
-    brew install fish
+# ─────────────────────────────────────────────
+# Fonts
+# ─────────────────────────────────────────────
+
+step "Fonts"
+if is_macos; then
+    brew install --cask font-aporetic
 else
-    echo "✅ Fish already installed."
+    # Homebrew casks are macOS-only; install the font manually on Linux
+    info "Linux detected — installing Aporetic font manually..."
+    FONT_DIR="$HOME/.local/share/fonts/Aporetic"
+    mkdir -p "$FONT_DIR"
+    FONT_TMP=$(mktemp -d)
+    curl -fsSL "https://github.com/protesilaos/aporetic/archive/refs/heads/main.tar.gz" \
+        | tar xz --strip-components=1 -C "$FONT_TMP"
+    find "$FONT_TMP" -name "*.ttf" -o -name "*.otf" | xargs -I{} cp {} "$FONT_DIR/"
+    fc-cache -f "$FONT_DIR"
+    rm -rf "$FONT_TMP"
 fi
+success "Fonts installed"
 
-# 3. Install Fonts
-echo "🔤 Installing Fonts..."
-brew install --cask font-maple-mono-nf
-echo "✅ Fonts installed"
+# ─────────────────────────────────────────────
+# Fish shell
+# ─────────────────────────────────────────────
 
-# 4. Set Fish as default shell (optional)
-echo "ℹ️  To set Fish as default shell, run: chsh -s $(which fish)"
+step "Fish"
+command -v fish &>/dev/null || brew install fish
+info "To set Fish as your system default shell: chsh -s \$(which fish)"
+success "Fish ready"
 
-# 5. Backup and install Fish config
-echo "📝 Setting up Fish configuration..."
+step "Fish config"
 FISH_CONFIG="$HOME/.config/fish"
-if [ -d "$FISH_CONFIG" ]; then
-    echo "Backing up existing Fish config..."
-    cp -r "$FISH_CONFIG" "$FISH_CONFIG.bak" 2>/dev/null || true
-    # Remove old config files and plugins for clean install
-    rm -rf "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions" 2>/dev/null || true
-    rm -f "$FISH_CONFIG/config.fish" "$FISH_CONFIG/fish_variables" "$FISH_CONFIG/fish_plugins" 2>/dev/null || true
-fi
-# Create directories
-if ! mkdir -p "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions" 2>/dev/null; then
-    echo "❌ Cannot create Fish config directory at $FISH_CONFIG"
-    echo "   This is likely due to permission issues."
-    exit 1
-fi
-echo "Downloading Fish config file..."
-if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/fish/config.fish -o "$FISH_CONFIG/config.fish"; then
-    echo "❌ Failed to download Fish config"
-    exit 1
-fi
-echo "✅ Fish configuration installed"
+backup_and_prepare "$FISH_CONFIG"
+rm -rf "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions"
+rm -f  "$FISH_CONFIG/config.fish" "$FISH_CONFIG/fish_variables" "$FISH_CONFIG/fish_plugins"
+mkdir -p "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions"
+download "$DOTFILES/fish/config.fish" "$FISH_CONFIG/config.fish"
+success "Fish config installed"
 
-# 6. Install Fisher (plugin manager)
-echo "🎣 Installing Fisher..."
+step "Fisher & plugins"
 fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-
-# 7. Install Fish plugins
-echo "🧩 Installing Fish plugins..."
 fish << 'EOF'
 source ~/.config/fish/functions/fisher.fish
 fisher install IlanCosman/tide@v6
@@ -79,142 +103,97 @@ fisher install nickeb96/puffer-fish
 fisher install acomagu/fish-async-prompt
 fisher install gazorby/fish-abbreviation-tips
 EOF
-echo "✅ All Fish plugins installed (Tide auto-configured in config.fish)"
+success "Fisher and all plugins installed"
 
-# 8. Install Kitty
-echo "🐱 Installing Kitty..."
-if ! command -v kitty &> /dev/null; then
-    curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+# ─────────────────────────────────────────────
+# Ghostty
+# ─────────────────────────────────────────────
+
+step "Ghostty"
+if ! command -v ghostty &>/dev/null; then
+    if is_macos; then
+        brew install --cask ghostty
+    else
+        echo
+        error "Ghostty has no Homebrew cask on Linux."
+        info  "Install it manually from: https://ghostty.org/docs/install/binary"
+        info  "Installing config anyway."
+    fi
 else
-    echo "✅ Kitty already installed."
+    success "Ghostty already installed"
 fi
 
-# 9. Backup and install Kitty config
-echo "📝 Setting up Kitty configuration..."
-KITTY_CONFIG="$HOME/.config/kitty"
-if [ -d "$KITTY_CONFIG" ]; then
-    echo "Backing up existing Kitty config..."
-    cp -r "$KITTY_CONFIG" "$KITTY_CONFIG.bak" 2>/dev/null || true
-fi
-if ! mkdir -p "$KITTY_CONFIG" 2>/dev/null; then
-    echo "❌ Cannot create Kitty config directory at $KITTY_CONFIG"
-    exit 1
-fi
-echo "Downloading Kitty config file..."
-if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/kitty.conf -o "$KITTY_CONFIG/kitty.conf"; then
-    echo "❌ Failed to download Kitty config"
-    exit 1
-fi
-if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/kitty/theme.conf -o "$KITTY_CONFIG/theme.conf"; then
-    echo "❌ Failed to download Kitty theme config"
-    exit 1
-fi
-echo "✅ Kitty configuration installed"
+step "Ghostty config"
+GHOSTTY_CONFIG="$HOME/.config/ghostty"
+backup_and_prepare "$GHOSTTY_CONFIG"
+download "$DOTFILES/ghostty/config.ghostty" "$GHOSTTY_CONFIG/config"
 
-# 14. Install opencode CLI
-echo "🤖 Installing opencode CLI..."
-if ! command -v opencode &> /dev/null; then
-    curl -fsSL https://opencode.ai/install | bash
-else
-    echo "✅ opencode already installed."
+# Set fish as Ghostty's default shell so shell integration is auto-injected.
+# Only appended if the config doesn't already define a command.
+if ! grep -q "^command" "$GHOSTTY_CONFIG/config" 2>/dev/null; then
+    printf "\ncommand = %s\n" "$(which fish)" >> "$GHOSTTY_CONFIG/config"
 fi
+success "Ghostty config installed (fish set as default shell)"
 
-# 15. Install opencode config
-echo "🤖 Setting up opencode configuration..."
-OPCODE_CONFIG="$HOME/.config/opencode"
-if [ -d "$OPCODE_CONFIG" ]; then
-    echo "Backing up existing opencode config..."
-    cp -r "$OPCODE_CONFIG" "$OPCODE_CONFIG.bak" 2>/dev/null || true
-fi
-if ! mkdir -p "$OPCODE_CONFIG" 2>/dev/null; then
-    echo "❌ Cannot create opencode config directory at $OPCODE_CONFIG"
+# ─────────────────────────────────────────────
+# Neovim
+# ─────────────────────────────────────────────
+
+step "Neovim"
+command -v nvim &>/dev/null || brew install neovim
+success "Neovim ready"
+
+step "npm & Codicons"
+if ! command -v npm &>/dev/null; then
+    error "npm is required for Neovim plugins. Install Node.js first, then re-run this script."
     exit 1
 fi
-echo "Copying opencode config file..."
-if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/opencode/opencode.jsonc -o "$OPCODE_CONFIG/opencode.jsonc"; then
-    echo "❌ Failed to download opencode config"
-    exit 1
-fi
-echo "✅ opencode configuration installed"
-
-# 16. Install opencode skills
-echo "🧠 Installing opencode skills..."
-OPCODE_SKILLS="$HOME/.config/opencode/skills"
-mkdir -p "$OPCODE_SKILLS/karpathy-guidelines"
-if ! curl -s https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/refs/heads/main/skills/karpathy-guidelines/SKILL.md -o "$OPCODE_SKILLS/karpathy-guidelines/SKILL.md"; then
-    echo "❌ Failed to download karpathy-guidelines skill"
-else
-    echo "✅ karpathy-guidelines skill installed"
-fi
-
-# 17. Install Neovim
-echo "🌚 Installing Neovim..."
-if ! command -v nvim &> /dev/null; then
-    brew install neovim
-else
-    echo "✅ Neovim already installed."
-fi
-
-# 18. Check for npm (required for Neovim plugins)
-echo "📦 Checking for npm..."
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm required for Neovim plugins (copilot.vim, nvim-web-devicons)"
-    echo "   Please install npm first, then run this script again."
-    exit 1
-fi
-echo "✅ npm already installed."
-echo "📦 Installing VS Code Codicons..."
 npm i @vscode/codicons
-echo "✅ VS Code Codicons installed"
+success "VS Code Codicons installed"
 
-# 19. Install pyright (LSP server for Python)
-echo "🐍 Installing pyright..."
-if ! command -v pyright &> /dev/null; then
-    brew install pyright
-    echo "✅ pyright installed"
-else
-    echo "✅ pyright already installed."
-fi
-
-# 20. Install uv (Python package manager)
-echo "🐍 Installing uv..."
-if ! command -v uv &> /dev/null; then
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-else
-    echo "✅ uv already installed."
-fi
-
-# 21. Install uv tools
-echo "🛠️  Installing uv tools..."
-if command -v uv &> /dev/null; then
-    uv tool install ruff@latest
-    uv tool install ty@latest
-    echo "✅ uv tools installed"
-else
-    echo "⚠️  Skipping uv tools installation (uv not found)"
-fi
-
-# 22. Install OpenSpec
-echo "🔍 Installing OpenSpec..."
-npm install -g @fission-ai/openspec@latest
-echo "✅ OpenSpec installed"
-
-# 23. Backup and install Neovim config
-echo "📝 Setting up Neovim configuration..."
+step "Neovim config"
 NVIM_CONFIG="$HOME/.config/nvim"
-if [ -d "$NVIM_CONFIG" ]; then
-    echo "Backing up existing Neovim config..."
-    cp -r "$NVIM_CONFIG" "$NVIM_CONFIG.bak" 2>/dev/null || true
-fi
-if ! mkdir -p "$NVIM_CONFIG" 2>/dev/null; then
-    echo "❌ Cannot create Neovim config directory at $NVIM_CONFIG"
-    exit 1
-fi
-echo "Downloading Neovim config file..."
-if ! curl -s https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/nvim/init.lua -o "$NVIM_CONFIG/init.lua"; then
-    echo "❌ Failed to download Neovim config"
-    exit 1
-fi
-echo "✅ Neovim configuration installed"
+backup_and_prepare "$NVIM_CONFIG"
+download "$DOTFILES/nvim/init.lua" "$NVIM_CONFIG/init.lua"
+success "Neovim config installed"
 
-echo "🎉 Setup complete! Restart your terminal to use Fish."
+# ─────────────────────────────────────────────
+# Python tooling
+# ─────────────────────────────────────────────
+
+step "Python tooling (uv, ruff, ty)"
+brew install uv ruff ty
+success "uv, ruff, and ty installed"
+
+step "Pyright (LSP)"
+command -v pyright &>/dev/null || brew install pyright
+success "Pyright ready"
+
+# ─────────────────────────────────────────────
+# pi coding agent
+# ─────────────────────────────────────────────
+
+step "pi coding agent"
+# No sudo needed — npm is managed by Homebrew or a version manager
+npm install -g @mariozechner/pi-coding-agent
+success "pi coding agent installed"
+
+step "pi agent config"
+PI_CONFIG="$HOME/.pi/agent"
+backup_and_prepare "$PI_CONFIG"
+
+# Shallow-clone dotfiles and copy .pi/agent into place
+PI_TMP=$(mktemp -d)
+git clone --depth 1 --branch "$DOTFILES_BRANCH" "$DOTFILES_REPO" "$PI_TMP"
+if [ -d "$PI_TMP/.pi/agent" ]; then
+    cp -r "$PI_TMP/.pi/agent/*" "$PI_CONFIG/"
+    success "pi agent config installed"
+else
+    error "Could not find .pi/agent in dotfiles repo — skipping"
+fi
+rm -rf "$PI_TMP"
+
+# ─────────────────────────────────────────────
+
+echo
+echo "🎉 Setup complete! Restart your terminal to start using Fish."
