@@ -39,9 +39,7 @@ DOTFILES_BRANCH="main-oma"
 
 step "Homebrew"
 if ! command -v brew &>/dev/null; then
-    read -p "Homebrew not found. Install it? (y/n): " -n 1 -r; echo
-    [[ $REPLY =~ ^[Yy]$ ]] || { error "Homebrew is required. Exiting."; exit 1; }
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     # Activate brew for the current session (Apple Silicon, Intel, Linux)
     if   [ -x "/opt/homebrew/bin/brew" ];              then eval "$(/opt/homebrew/bin/brew shellenv)"
     elif [ -x "/usr/local/bin/brew" ];                 then eval "$(/usr/local/bin/brew shellenv)"
@@ -56,21 +54,19 @@ success "Homebrew ready"
 # ─────────────────────────────────────────────
 
 step "Fonts"
+FONT_DIR="$HOME/.local/share/fonts/AporeticNerdFont"
+mkdir -p "$FONT_DIR"
+FONT_TMP=$(mktemp -d)
+git clone --depth 1 https://github.com/Echinoidea/Aporetic-Nerd-Font "$FONT_TMP"
+cp "$FONT_TMP"/*.ttf "$FONT_DIR/"
+rm -rf "$FONT_TMP"
 if is_macos; then
-    brew install --cask font-aporetic
+    # Register fonts with macOS font system
+    cp "$FONT_DIR"/*.ttf "$HOME/Library/Fonts/" 2>/dev/null || true
 else
-    # Homebrew casks are macOS-only; install the font manually on Linux
-    info "Linux detected — installing Aporetic font manually..."
-    FONT_DIR="$HOME/.local/share/fonts/Aporetic"
-    mkdir -p "$FONT_DIR"
-    FONT_TMP=$(mktemp -d)
-    curl -fsSL "https://github.com/protesilaos/aporetic/archive/refs/heads/main.tar.gz" \
-        | tar xz --strip-components=1 -C "$FONT_TMP"
-    find "$FONT_TMP" -name "*.ttf" -o -name "*.otf" | xargs -I{} cp {} "$FONT_DIR/"
     fc-cache -f "$FONT_DIR"
-    rm -rf "$FONT_TMP"
 fi
-success "Fonts installed"
+success "Aporetic Nerd Font installed"
 
 # ─────────────────────────────────────────────
 # Fish shell
@@ -117,7 +113,6 @@ if ! command -v ghostty &>/dev/null; then
         echo
         error "Ghostty has no Homebrew cask on Linux."
         info  "Install it manually from: https://ghostty.org/docs/install/binary"
-        info  "Installing config anyway."
     fi
 else
     success "Ghostty already installed"
@@ -148,7 +143,7 @@ if ! command -v npm &>/dev/null; then
     error "npm is required for Neovim plugins. Install Node.js first, then re-run this script."
     exit 1
 fi
-npm i @vscode/codicons
+npm i --yes @vscode/codicons
 success "VS Code Codicons installed"
 
 step "Neovim config"
@@ -174,19 +169,16 @@ success "Pyright ready"
 # ─────────────────────────────────────────────
 
 step "pi coding agent"
-# No sudo needed — npm is managed by Homebrew or a version manager
-npm install -g @mariozechner/pi-coding-agent
+npm install --yes -g @mariozechner/pi-coding-agent
 success "pi coding agent installed"
 
 step "pi agent config"
 PI_CONFIG="$HOME/.pi/agent"
 backup_and_prepare "$PI_CONFIG"
-
-# Shallow-clone dotfiles and copy .pi/agent into place
 PI_TMP=$(mktemp -d)
 git clone --depth 1 --branch "$DOTFILES_BRANCH" "$DOTFILES_REPO" "$PI_TMP"
 if [ -d "$PI_TMP/.pi/agent" ]; then
-    cp -r "$PI_TMP/.pi/agent/*" "$PI_CONFIG/"
+    cp -r "$PI_TMP/.pi/agent/." "$PI_CONFIG/"
     success "pi agent config installed"
 else
     error "Could not find .pi/agent in dotfiles repo — skipping"
