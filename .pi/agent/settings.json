@@ -7,6 +7,7 @@
   "doubleEscapeAction": "tree",
   "defaultThinkingLevel": "medium",
   "hideThinkingBlock": false,
+  "enableInstallTelemetry": false,
   "packages": [
     "npm:@ifi/pi-plan",
     "npm:pi-ghostty",

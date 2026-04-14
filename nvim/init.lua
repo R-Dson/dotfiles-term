@@ -90,10 +90,11 @@ MiniDeps.setup({
   },
 })
 
-MiniDeps.add('folke/tokyonight.nvim')
-MiniDeps.add('bluz71/vim-moonfly-colors')
-MiniDeps.add('miikanissi/modus-themes.nvim')
-MiniDeps.add('slugbyte/lackluster.nvim')
+-- Themes
+MiniDeps.add({
+  source = 'dracula/vim',
+  as = 'dracula',
+})
 MiniDeps.add('github/copilot.vim')
 MiniDeps.add('sudo-tee/opencode.nvim')
 MiniDeps.add('romus204/referencer.nvim')
@@ -170,31 +171,11 @@ vim.schedule(function()
   end)
 end)
 
--- Modus themes configuration (default theme)
-local modusThemes = require('modus-themes')
-modusThemes.setup({
-  style = 'modus_vivendi',
-  transparent = false,
-  dim_inactive = false,
-  line_nr_column_background = false,
-  sign_column_background = false,
-  styles = {
-    comments = { italic = true },
-    keywords = { italic = true },
-    functions = { italic = true },
-    variables = {},
-  },
-  on_colors = function(colors)
-    colors.bg_main = '#121212'
-    colors.bg_dim = '#1a1a1a'
-    colors.bg_status_line_active = '#2a2a2a'
-    colors.comment = '#989898'
-    colors.fg_inactive = '#bfc0c4'
-  end,
-})
-
--- Apply modus theme by default
-vim.cmd('colorscheme modus')
+-- Dracula theme configuration
+pcall(function()
+  vim.cmd('packadd dracula')
+  vim.cmd('colorscheme dracula')
+end)
 
 -- See :help MiniIcons.config
 -- Change style to 'glyph' if you have a font with fancy icons
