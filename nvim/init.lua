@@ -91,10 +91,7 @@ MiniDeps.setup({
 })
 
 -- Themes
-MiniDeps.add({
-  source = 'dracula/vim',
-  as = 'dracula',
-})
+MiniDeps.add('dracula/vim')
 MiniDeps.add('github/copilot.vim')
 MiniDeps.add('sudo-tee/opencode.nvim')
 MiniDeps.add('romus204/referencer.nvim')
@@ -173,7 +170,7 @@ end)
 
 -- Dracula theme configuration
 pcall(function()
-  vim.cmd('packadd dracula')
+  vim.cmd('packadd vim')
   vim.cmd('colorscheme dracula')
 end)
 
