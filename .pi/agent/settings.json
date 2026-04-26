@@ -1,19 +1,15 @@
 {
-  "lastChangelogVersion": "0.65.0",
+  "lastChangelogVersion": "0.70.2",
   "defaultProvider": "llama-server",
   "defaultModel": "gemma-4-31B:IQ4_XS",
-  "theme": "ghostty-sync-fc14c074",
+  "theme": "dracula",
   "collapseChangelog": false,
   "doubleEscapeAction": "tree",
-  "defaultThinkingLevel": "medium",
-  "hideThinkingBlock": false,
+  "defaultThinkingLevel": "high",
+  "hideThinkingBlock": true,
   "enableInstallTelemetry": false,
   "packages": [
-    "npm:@ifi/pi-plan",
     "npm:pi-ghostty",
-    "npm:@ogulcancelik/pi-ghostty-theme-sync",
-    "npm:@tintinweb/pi-subagents",
-    "npm:pi-animations",
     "npm:pi-extmgr",
     "npm:lsp-pi",
     "npm:pi-markdown-preview",
@@ -21,7 +17,8 @@
     "npm:pi-updater",
     "npm:pi-ask-user",
     "npm:@benvargas/pi-firecrawl",
-    "npm:pi-codebase-memory"
+    "npm:pi-codebase-memory",
+    "npm:pi-modes"
   ],
   "terminal": {
     "showImages": true
