@@ -30,3 +30,8 @@ palette = 12=#8be9fd
 palette = 13=#f1fa8c
 palette = 14=#6272a4
 palette = 15=#44475a
+
+command = /home/linuxbrew/.linuxbrew/bin/fish
+
+window-decoration = false 
+gtk-titlebar-style = tabs
