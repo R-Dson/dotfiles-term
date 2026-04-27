@@ -15,7 +15,7 @@
         }
       ]
     },
-		"llama-server": {
+    "llama-server": {
       "baseUrl": "http://localhost:8080/v1",
       "api": "openai-completions",
       "apiKey": "ANTHROPIC_AUTH_TOKEN",
@@ -25,10 +25,10 @@
       },
       "models": [
         {
-					"id": "gemma-4-31B:IQ4_XS",
+          "id": "gemma-4-31B:IQ4_XS",
           "reasoning": true
         }
       ]
-		}
+    }
   }
 }
