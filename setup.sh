@@ -169,7 +169,7 @@ success "Pyright ready"
 # ─────────────────────────────────────────────
 
 step "pi coding agent"
-npm install --yes -g @mariozechner/pi-coding-agent
+npm install --yes -g @earendil-works/pi-coding-agent
 success "pi coding agent installed"
 
 step "pi agent config"
