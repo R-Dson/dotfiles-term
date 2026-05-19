@@ -138,11 +138,11 @@ step "Neovim"
 command -v nvim &>/dev/null || brew install neovim
 success "Neovim ready"
 
+
 step "npm & Codicons"
-if ! command -v npm &>/dev/null; then
-    error "npm is required for Neovim plugins. Install Node.js first, then re-run this script."
-    exit 1
-fi
+command -v npm &>/dev/null || brew install npm
+success "npm ready"
+
 npm i --yes @vscode/codicons
 success "VS Code Codicons installed"
 
