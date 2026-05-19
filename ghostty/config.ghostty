@@ -31,7 +31,7 @@ palette = 13=#f1fa8c
 palette = 14=#6272a4
 palette = 15=#44475a
 
-command = /home/linuxbrew/.linuxbrew/bin/fish
+command = "$(which fish)"
 
 window-decoration = false 
 gtk-titlebar-style = tabs
