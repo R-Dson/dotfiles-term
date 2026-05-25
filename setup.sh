@@ -131,13 +131,27 @@ fi
 success "Ghostty config installed (fish set as default shell)"
 
 # ─────────────────────────────────────────────
+# VS Code
+# ─────────────────────────────────────────────
+
+step "VS Code config"
+if is_macos; then
+    VSCODE_CONFIG="$HOME/Library/Application Support/Code/User"
+else
+    VSCODE_CONFIG="$HOME/.config/Code/User"
+fi
+
+backup_and_prepare "$VSCODE_CONFIG"
+download "$DOTFILES/Code/User/settings.json" "$VSCODE_CONFIG/settings.json"
+success "VS Code settings installed"
+
+# ─────────────────────────────────────────────
 # Neovim
 # ─────────────────────────────────────────────
 
 step "Neovim"
 command -v nvim &>/dev/null || brew install neovim
 success "Neovim ready"
-
 
 step "npm & Codicons"
 command -v npm &>/dev/null || brew install npm
