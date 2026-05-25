@@ -1,0 +1,70 @@
+{
+  "window.titleBarStyle": "custom",
+  "update.mode": "none",
+  "workbench.colorTheme": "Dracula Refined",
+  "terminal.integrated.fontFamily": "monospace",
+  "editor.fontFamily": "AporeticSansMonoNerdFont",
+  "editor.fontSize": 14,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorBlinking": "smooth",
+  "terminal.integrated.smoothScrolling": true,
+  "workbench.list.smoothScrolling": true,
+  "gopls": {
+    "ui.semanticTokens": true
+  },
+  "editor.semanticHighlighting.enabled": true,
+  "editor.semanticTokenColorCustomizations": {
+    "[Dracula Refined]": {
+      "enabled": true,
+      "rules": {
+        "property": "#f8f8f2",
+        "variable": "#f8f8f2",
+        "parameter": "#ffb86c",
+        "variable.readonly": "#bd93f9",
+        "variable.defaultLibrary": "#bd93f9",
+        "keyword": "#ff79c6",
+        "string": "#f1fa8c",
+        "type": "#8be9fd",
+        "class": "#8be9fd",
+        "typeParameter": "#bd93f9",
+        "function": "#bd93f9",
+        "method": "#bd93f9",
+        "boolean": "#bd93f9",
+        "enumMember": "#ff79c6",
+        "enum": "#8be9fd",
+        "label": "#f1fa8c",
+        "decorator": "#ff79c6"
+      }
+    }
+  },
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": ["variable.parameter.go", "variable.parameter"],
+        "settings": { "foreground": "#ffb86c", "fontStyle": "" }
+      },
+      {
+        "scope": ["entity.name.type.go", "entity.name.type"],
+        "settings": { "foreground": "#8be9fd", "fontStyle": "italic" }
+      },
+      {
+        "scope": ["entity.name.function.support.go", "entity.name.function"],
+        "settings": { "foreground": "#bd93f9", "fontStyle": "" }
+      },
+      {
+        "scope": ["keyword.function.go", "keyword.control.go", "keyword"],
+        "settings": { "foreground": "#ff79c6", "fontStyle": "" }
+      }
+      ,
+      {
+        "scope": ["constant.language.boolean.go", "constant.language.boolean", "constant.language.boolean"],
+        "settings": { "foreground": "#bd93f9", "fontStyle": "" }
+      }
+      ,
+      {
+        "scope": ["string.quoted", "string"],
+        "settings": { "foreground": "#f1fa8c", "fontStyle": "" }
+      }
+    ]
+  }
+}
