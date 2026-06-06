@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.70.2",
+  "lastChangelogVersion": "0.78.1",
   "defaultProvider": "llama-server",
   "defaultModel": "gemma-4-31B:IQ4_XS",
   "theme": "dracula",
@@ -11,14 +11,14 @@
   "packages": [
     "npm:pi-ghostty",
     "npm:pi-extmgr",
-    "npm:lsp-pi",
     "npm:pi-markdown-preview",
     "npm:pi-rewind",
     "npm:pi-updater",
     "npm:pi-ask-user",
     "npm:@benvargas/pi-firecrawl",
     "npm:pi-codebase-memory",
-    "npm:pi-modes"
+    "npm:pi-modes",
+    "npm:pi-lens"
   ],
   "terminal": {
     "showImages": true
