@@ -20,12 +20,10 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/R-Dson/dotfiles-term/ref
 
 ## Installer Options
 
-| Option         | Description                      |
-| -------------- | -------------------------------- |
-| `-y`           | Accept all prompts automatically |
-| `-Y`           | Accept all prompts automatically |
-| `--yes`        | Accept all prompts automatically |
-| `-h`, `--help` | Show usage help                  |
+| Option              | Description                      |
+| ------------------- | -------------------------------- |
+| `-y`, `-Y`, `--yes` | Accept all prompts automatically |
+| `-h`, `--help`      | Show usage help                  |
 
 ## What Gets Installed
 
