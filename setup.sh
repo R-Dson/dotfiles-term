@@ -329,12 +329,6 @@ install_neovim_config() {
     success "Neovim config installed"
 }
 
-install_python_tooling() {
-    ensure_brew && brew install uv ruff ty
-
-    success "uv, ruff, and ty installed"
-}
-
 install_pyright() {
     if ! command -v pyright &>/dev/null; then
         ensure_brew && brew install pyright
@@ -396,7 +390,6 @@ main() {
     run_step "Install npm and VS Code Codicons?" "npm & Codicons" install_codicons
     run_step "Install Neovim config?" "Neovim config" install_neovim_config
 
-    run_step "Install Python tooling: uv, ruff, and ty?" "Python tooling" install_python_tooling
     run_step "Install Pyright LSP?" "Pyright" install_pyright
 
     run_step "Install pi coding agent?" "pi coding agent" install_pi_agent
