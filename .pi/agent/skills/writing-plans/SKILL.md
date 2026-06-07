@@ -1,84 +1,325 @@
 ---
 name: writing-plans
-description: Use this skill when you have requirements for a multi-step technical task but before touching any code. It enforces a TDD-based, atomic implementation plan saved to a markdown file to ensure the agent stays on track during execution.
+description: Creates TDD-first, atomic implementation plans for multi-step technical work before code changes begin. Use when the user provides requirements, specs, bugs, or feature requests that need structured implementation planning. Do not use for trivial one-step edits.
 disable-model-invocation: false
 ---
 
-# Writing Plans (Architect Mode)
+# Writing plans
 
-Write comprehensive, TDD-first implementation plans. Assume the implementer is a skilled developer who has zero context of this specific codebase. Your goal is to decompose the goal into atomic, verifiable tasks that keep the codebase "green" at every step.
+## Purpose
 
-## 1. Triage & Scope
-- **Worktree:** Always run this in a dedicated worktree (e.g., created by brainstorming).
-- **Decomposition:** If a spec covers multiple subsystems, suggest breaking it into separate plans. One plan = one testable, working feature.
-- **Limits:** Max 15 steps per plan. If more are needed, split into "Phase 1" and "Phase 2".
+Create implementation plans that a skilled developer or agent can execute task by task without needing extra codebase context. Plans must be atomic, test-driven, verifiable, and safe to execute incrementally.
 
-## 2. Plan Structure & Location
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+## When to use
 
-### Header Template
-```markdown
-# [Feature Name] Implementation Plan
+Use this skill before touching code when the task involves:
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) to implement this plan task-by-task.
+- A new feature.
+- A non-trivial bug fix.
+- Refactoring across multiple files.
+- API, schema, or state-management changes.
+- Multiple implementation steps.
+- Any request where execution order matters.
 
-**Goal:** [One sentence description]
-**Architecture:** [2-3 sentences on approach and file boundaries]
-**Tech Stack:** [Key libraries/tools]
+Do not use this skill for:
+
+- Simple typo fixes.
+- One-line configuration changes.
+- Documentation-only edits.
+- Small changes where the user explicitly asks to edit directly.
+
 ---
+
+## Required reference
+
+When reviewing a completed plan, load:
+
+```text
+plan-document-reviewer-prompt.md
+````
+
+Use it to dispatch or simulate a plan-review pass before implementation begins.
+
+---
+
+## Planning workflow
+
+1. **Inspect**
+
+   * Read the spec or user request.
+   * Inspect relevant files, tests, package scripts, and existing patterns.
+   * Confirm the package manager and test commands.
+   * Check current Git state before planning file changes.
+
+2. **Scope**
+
+   * Define one testable goal.
+   * Split the work if the request spans unrelated subsystems.
+   * Keep each plan to 15 tasks or fewer.
+   * If more tasks are required, split into phases or separate plans.
+
+3. **Map files**
+
+   * List files to create.
+   * List files to modify.
+   * List files to read for context.
+   * Keep names, types, and functions consistent across all tasks.
+
+4. **Write tasks**
+
+   * Start with a baseline verification task.
+   * Use a TDD loop for each implementation task.
+   * Keep each task atomic, unambiguous, and verifiable.
+   * Include exact commands and expected outcomes.
+
+5. **Review**
+
+   * Search for placeholders, vague steps, missing definitions, and unsupported references.
+   * Verify that each task can be completed independently.
+   * Ensure the final task performs end-to-end verification.
+
+6. **Save**
+
+   * Save the plan to:
+
+```text
+docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md
 ```
 
-## 3. The "Atomic" Task Rule
-Each task must be **Atomic** (one action), **Unambiguous** (no decisions left to the coder), and **Verifiable** (clear success condition). 
+7. **Handoff**
 
-**Each Task MUST follow this TDD loop:**
-1.  **Step 1: Write the failing test.** (Include the exact code snippet).
-2.  **Step 2: Run test to verify failure.** (Include the exact command and expected error).
-3.  **Step 3: Minimal implementation.** (Include the exact code to pass the test).
-4.  **Step 4: Verify pass.** (Include the command and expected output).
-5.  **Step 5: Commit.** (Include the `git commit -m` command).
+   * Offer implementation options:
 
-## 4. Hard Rules (No Placeholders)
-The following are **Plan Failures**. Never include them:
-- "TBD", "TODO", or "Implement later".
-- "Add appropriate error handling" (Show the exact `try/catch` logic).
-- "Write tests for the above" (Show the actual test code).
-- References to functions or types not yet defined in the plan.
-- Steps taking longer than 30 minutes. If it's long, split it.
+     * Subagent-driven execution: one fresh worker per task.
+     * Inline execution: execute tasks in the current session using the execution skill.
 
-## 5. File Mapping
-Before listing tasks, map out the affected files:
-- **Create:** New files with clear, single responsibilities.
-- **Modify:** Existing files (use `path/to/file.ts:line-range` for context).
-- **Stay Consistent:** Ensure function names used in Task 1 match Task 10.
+---
 
-## 6. Self-Review & Handoff
-Before saving, search your plan for "red flag" placeholders. Ensure the first step is a "green check" (e.g., running existing tests) and the last step is an End-to-End verification.
+## Plan format
 
-**After saving, offer the user these choices:**
-1.  **Subagent-Driven (Recommended):** Dispatch a fresh subagent per task for maximum reliability.
-2.  **Inline Execution:** Execute tasks in the current session using `executing-plans`.
+Use this structure for every plan.
 
-## Execution Example
+````markdown
+# <Feature name> implementation plan
 
-### Task 1: Validation Logic
-**Files:** `src/lib/validate.ts` (create), `tests/validate.test.ts` (create)
+> For agentic workers: implement this plan task by task. Complete one task, verify it, then move to the next.
 
-- [ ] **Step 1: Write failing test**
-  ```typescript
-  // tests/validate.test.ts
-  test('should reject empty email', () => {
-    expect(validateEmail('')).toBe(false);
-  });
+**Goal:** <one-sentence outcome>
+**Architecture:** <2-3 sentences describing approach, boundaries, and integration points>
+**Tech stack:** <relevant libraries, frameworks, test tools, package manager>
+
+---
+
+## File map
+
+### Create
+
+- `<path>` — <single responsibility>
+
+### Modify
+
+- `<path>` — <what changes and why>
+
+### Read for context
+
+- `<path>` — <why it matters>
+
+---
+
+## Baseline verification
+
+- [ ] Run existing relevant tests
+
+  Command:
+
+  ```bash
+  <test command>
+````
+
+Expected result:
+
+```text
+<current passing result or known failure to preserve>
+```
+
+---
+
+## Tasks
+
+### Task 1: <short task title>
+
+**Files:** `<path>`, `<path>`
+
+* [ ] Write failing test
+
+  ```<language>
+  <exact test code>
   ```
-- [ ] **Step 2: Verify failure**
-  Run: `npm test tests/validate.test.ts`. Expected: `ReferenceError: validateEmail is not defined`.
-- [ ] **Step 3: Implementation**
-  ```typescript
-  // src/lib/validate.ts
-  export const validateEmail = (email: string) => email.includes('@');
+
+* [ ] Verify failure
+
+  ```bash
+  <test command>
   ```
-- [ ] **Step 4: Verify pass**
-  Run: `npm test tests/validate.test.ts`. Expected: `1 passed`.
-- [ ] **Step 5: Commit**
-  `git commit -m "feat: add email validation logic"`
+
+  Expected failure:
+
+  ```text
+  <specific failing assertion, error, or snapshot change>
+  ```
+
+* [ ] Implement minimal change
+
+  ```<language>
+  <exact or highly specific implementation>
+  ```
+
+* [ ] Verify pass
+
+  ```bash
+  <test command>
+  ```
+
+  Expected result:
+
+  ```text
+  <specific passing result>
+  ```
+
+* [ ] Commit
+
+  ```bash
+  git add <files>
+  git commit -m "<type>(<scope>): <imperative summary>"
+  ```
+
+---
+
+## End-to-end verification
+
+* [ ] Run full relevant test suite
+
+  ```bash
+  <command>
+  ```
+
+* [ ] Run lint, typecheck, or build if available
+
+  ```bash
+  <command>
+  ```
+
+* [ ] Confirm final Git state
+
+  ```bash
+  git status --short
+  ```
+
+````
+
+---
+
+## Atomic task rules
+
+Each task must be:
+
+- **Atomic:** one logical change.
+- **Unambiguous:** no major decisions left to the implementer.
+- **Verifiable:** clear command and expected result.
+- **Small:** intended to fit in one focused work session.
+- **Green-preserving:** repository should return to passing state after the task.
+
+A task fails review if it contains:
+
+- `TBD`, `TODO`, `later`, or placeholder text.
+- “Add appropriate error handling” without exact behavior.
+- “Write tests” without actual test cases or test intent.
+- References to functions, types, files, or commands not introduced or verified.
+- Broad tasks that mix unrelated changes.
+- Steps that require guessing project conventions.
+- Commits without explicit staged files and a valid commit message.
+
+---
+
+## TDD task loop
+
+Use this loop for implementation tasks:
+
+1. Write or update the failing test.
+2. Run the test and verify the expected failure.
+3. Implement the smallest change that passes the test.
+4. Run the test and verify the pass.
+5. Commit the atomic change.
+
+Use non-TDD tasks only for setup, inspection, mechanical file moves, generated files, or final verification. Mark those tasks clearly.
+
+---
+
+## Commit rules
+
+Use Conventional Commits:
+
+```text
+<type>[optional scope]: <description>
+````
+
+Common types:
+
+* `feat`
+* `fix`
+* `refactor`
+* `test`
+* `docs`
+* `chore`
+* `build`
+* `ci`
+
+Examples:
+
+```text
+feat(auth): add email validation
+fix(api): reject invalid pagination cursor
+test(ui): cover disabled submit state
+refactor(config): isolate environment parsing
+```
+
+---
+
+## Red-flag review
+
+Before saving, check:
+
+```bash
+grep -RniE "TBD|TODO|later|appropriate|as needed|etc\\.|placeholder" docs/superpowers/plans/
+```
+
+Also verify:
+
+* First task establishes current baseline.
+* Last task performs end-to-end verification.
+* Every created or modified file is listed in the file map.
+* Task names match file, function, and test names used later.
+* Test commands match the detected package manager.
+* No task depends on hidden context.
+* No implementation step silently skips validation.
+
+---
+
+## Output contract
+
+After saving the plan, report:
+
+```text
+Plan saved:
+- <plan path>
+
+Scope:
+- <one-sentence summary>
+
+Validation:
+- <review checks performed>
+
+Next options:
+1. Subagent-driven execution — implement one task per fresh worker.
+2. Inline execution — implement tasks in this session using the execution skill.
+```
