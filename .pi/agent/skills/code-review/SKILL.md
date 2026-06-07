@@ -22,6 +22,10 @@ Use this skill when asked to:
 
 Do not use as the primary guide for full security audits, performance benchmarking without runtime data, style-only formatting passes, or product/UX copy review.
 
+## Optional reference
+
+Load `references/examples.md` only when severity calibration, finding wording, or review-output examples are needed.
+
 ## Review workflow
 
 1. **Understand scope** — identify review target and read relevant spec, issue, tests, and surrounding code.

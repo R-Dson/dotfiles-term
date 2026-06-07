@@ -22,6 +22,10 @@ Use this skill when the task involves:
 
 Do not use this as the primary guide for application architecture, language-specific testing, deployment strategy, or database migration planning. For detailed commit-message writing, use the `commits` skill.
 
+## Optional reference
+
+Load `references/handbook.md` only when concrete command recipes, recovery steps, destructive-operation previews, or Git troubleshooting details are needed.
+
 ## Operating workflow
 
 1. **Inspect** — confirm location, repo root, branch, and working tree before mutation.
