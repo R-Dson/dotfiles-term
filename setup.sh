@@ -3,18 +3,119 @@
 set -e
 
 # ─────────────────────────────────────────────
-# Helpers
+# Globals
+# ─────────────────────────────────────────────
+
+ASSUME_YES=0
+
+DOTFILES="https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma"
+DOTFILES_REPO="https://github.com/R-Dson/dotfiles-term"
+DOTFILES_BRANCH="main-oma"
+
+# ─────────────────────────────────────────────
+# CLI
+# ─────────────────────────────────────────────
+
+usage() {
+    cat << EOF
+Usage: $0 [-y|-Y|--yes]
+
+Options:
+  -y, -Y, --yes    Accept all prompts automatically
+  -h, --help       Show this help message
+EOF
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -y|-Y|--yes)
+                ASSUME_YES=1
+                shift
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1" >&2
+                usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# ─────────────────────────────────────────────
+# Logging
 # ─────────────────────────────────────────────
 
 info()    { echo "ℹ️  $*"; }
 success() { echo "✅ $*"; }
 error()   { echo "❌ $*" >&2; }
-step()    { echo; echo "── $* ──────────────────────────────"; }
 
-is_macos() { [[ "$(uname -s)" == "Darwin" ]]; }
+step() {
+    echo
+    echo "── $* ──────────────────────────────"
+}
+
+# ─────────────────────────────────────────────
+# Helpers
+# ─────────────────────────────────────────────
+
+is_macos() {
+    [[ "$(uname -s)" == "Darwin" ]]
+}
+
+confirm() {
+    local prompt="$1"
+    local reply
+
+    if [[ "$ASSUME_YES" -eq 1 ]]; then
+        info "$prompt: yes"
+        return 0
+    fi
+
+    while true; do
+        read -r -p "$prompt [Y/n] " reply
+
+        case "$reply" in
+            ""|y|Y|yes|YES|Yes)
+                return 0
+                ;;
+            n|N|no|NO|No)
+                return 1
+                ;;
+            *)
+                info "Please answer yes or no."
+                ;;
+        esac
+    done
+}
+
+run_step() {
+    local prompt="$1"
+    local title="$2"
+    local fn="$3"
+
+    if confirm "$prompt"; then
+        step "$title"
+
+        if "$fn"; then
+            return 0
+        else
+            error "$title failed or was skipped because a requirement was missing."
+            return 0
+        fi
+    else
+        info "Skipped $title"
+    fi
+}
 
 download() {
-    local url="$1" dest="$2"
+    local url="$1"
+    local dest="$2"
+
     if ! curl -fsSL "$url" -o "$dest"; then
         error "Failed to download: $url"
         exit 1
@@ -23,72 +124,122 @@ download() {
 
 backup_and_prepare() {
     local dir="$1"
+
     if [ -d "$dir" ]; then
         cp -r "$dir" "${dir}.bak" 2>/dev/null || true
     fi
-    mkdir -p "$dir" || { error "Cannot create directory: $dir"; exit 1; }
+
+    mkdir -p "$dir" || {
+        error "Cannot create directory: $dir"
+        exit 1
+    }
 }
 
-DOTFILES="https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma"
-DOTFILES_REPO="https://github.com/R-Dson/dotfiles-term"
-DOTFILES_BRANCH="main-oma"
-
-# ─────────────────────────────────────────────
-# Homebrew
-# ─────────────────────────────────────────────
-
-step "Homebrew"
-if ! command -v brew &>/dev/null; then
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Activate brew for the current session (Apple Silicon, Intel, Linux)
-    if   [ -x "/opt/homebrew/bin/brew" ];              then eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [ -x "/usr/local/bin/brew" ];                 then eval "$(/usr/local/bin/brew shellenv)"
-    elif [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    else error "Homebrew installed but brew binary not found in expected locations."; exit 1
+ensure_brew() {
+    if command -v brew &>/dev/null; then
+        return 0
     fi
-fi
-success "Homebrew ready"
+
+    error "Homebrew is required for this step but is not installed."
+    info "Run this script again and choose yes for Homebrew, or install Homebrew manually."
+    return 1
+}
+
+ensure_npm() {
+    if command -v npm &>/dev/null; then
+        return 0
+    fi
+
+    ensure_brew && brew install npm
+}
+
+ensure_fish() {
+    if command -v fish &>/dev/null; then
+        return 0
+    fi
+
+    ensure_brew && brew install fish
+}
 
 # ─────────────────────────────────────────────
-# Fonts
+# Setup steps
 # ─────────────────────────────────────────────
 
-step "Fonts"
-FONT_DIR="$HOME/.local/share/fonts/AporeticNerdFont"
-mkdir -p "$FONT_DIR"
-FONT_TMP=$(mktemp -d)
-git clone --depth 1 https://github.com/Echinoidea/Aporetic-Nerd-Font "$FONT_TMP"
-cp "$FONT_TMP"/*.ttf "$FONT_DIR/"
-rm -rf "$FONT_TMP"
-if is_macos; then
-    # Register fonts with macOS font system
-    cp "$FONT_DIR"/*.ttf "$HOME/Library/Fonts/" 2>/dev/null || true
-else
-    fc-cache -f "$FONT_DIR"
-fi
-success "Aporetic Nerd Font installed"
+setup_homebrew() {
+    if ! command -v brew &>/dev/null; then
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# ─────────────────────────────────────────────
-# Fish shell
-# ─────────────────────────────────────────────
+        if [ -x "/opt/homebrew/bin/brew" ]; then
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        elif [ -x "/usr/local/bin/brew" ]; then
+            eval "$(/usr/local/bin/brew shellenv)"
+        elif [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        else
+            error "Homebrew installed but brew binary not found in expected locations."
+            exit 1
+        fi
+    fi
 
-step "Fish"
-command -v fish &>/dev/null || brew install fish
-info "To set Fish as your system default shell: chsh -s \$(which fish)"
-success "Fish ready"
+    success "Homebrew ready"
+}
 
-step "Fish config"
-FISH_CONFIG="$HOME/.config/fish"
-backup_and_prepare "$FISH_CONFIG"
-rm -rf "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions"
-rm -f  "$FISH_CONFIG/config.fish" "$FISH_CONFIG/fish_variables" "$FISH_CONFIG/fish_plugins"
-mkdir -p "$FISH_CONFIG/functions" "$FISH_CONFIG/conf.d" "$FISH_CONFIG/completions"
-download "$DOTFILES/fish/config.fish" "$FISH_CONFIG/config.fish"
-success "Fish config installed"
+install_fonts() {
+    local font_dir="$HOME/.local/share/fonts/AporeticNerdFont"
+    local font_tmp
 
-step "Fisher & plugins"
-fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
-fish << 'EOF'
+    mkdir -p "$font_dir"
+
+    font_tmp=$(mktemp -d)
+    git clone --depth 1 https://github.com/Echinoidea/Aporetic-Nerd-Font "$font_tmp"
+    cp "$font_tmp"/*.ttf "$font_dir/"
+    rm -rf "$font_tmp"
+
+    if is_macos; then
+        mkdir -p "$HOME/Library/Fonts"
+        cp "$font_dir"/*.ttf "$HOME/Library/Fonts/" 2>/dev/null || true
+    else
+        if command -v fc-cache &>/dev/null; then
+            fc-cache -f "$font_dir"
+        else
+            info "fc-cache not found; fonts were copied but cache was not refreshed."
+        fi
+    fi
+
+    success "Aporetic Nerd Font installed"
+}
+
+install_fish() {
+    ensure_fish
+
+    info "To set Fish as your system default shell: chsh -s \$(which fish)"
+    success "Fish ready"
+}
+
+install_fish_config() {
+    local fish_config="$HOME/.config/fish"
+
+    backup_and_prepare "$fish_config"
+
+    rm -rf "$fish_config/functions" "$fish_config/conf.d" "$fish_config/completions"
+    rm -f  "$fish_config/config.fish" "$fish_config/fish_variables" "$fish_config/fish_plugins"
+
+    mkdir -p "$fish_config/functions" "$fish_config/conf.d" "$fish_config/completions"
+
+    download "$DOTFILES/fish/config.fish" "$fish_config/config.fish"
+
+    success "Fish config installed"
+}
+
+install_fisher_plugins() {
+    if ! command -v fish &>/dev/null; then
+        error "Fish is not installed; skipping Fisher and plugins."
+        return 0
+    fi
+
+    fish -c "curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source && fisher install jorgebucaran/fisher"
+
+    fish << 'EOF'
 source ~/.config/fish/functions/fisher.fish
 fisher install IlanCosman/tide@v6
 fisher install PatrickF1/fzf.fish
@@ -99,107 +250,153 @@ fisher install nickeb96/puffer-fish
 fisher install acomagu/fish-async-prompt
 fisher install gazorby/fish-abbreviation-tips
 EOF
-success "Fisher and all plugins installed"
 
-# ─────────────────────────────────────────────
-# Ghostty
-# ─────────────────────────────────────────────
+    success "Fisher and all plugins installed"
+}
 
-step "Ghostty"
-if ! command -v ghostty &>/dev/null; then
+install_ghostty() {
+    if command -v ghostty &>/dev/null; then
+        success "Ghostty already installed"
+        return 0
+    fi
+
     if is_macos; then
-        brew install --cask ghostty
+        ensure_brew && brew install --cask ghostty
+        success "Ghostty installed"
     else
-        echo
         error "Ghostty has no Homebrew cask on Linux."
         info  "Install it manually from: https://ghostty.org/docs/install/binary"
     fi
-else
-    success "Ghostty already installed"
-fi
+}
 
-step "Ghostty config"
-GHOSTTY_CONFIG="$HOME/.config/ghostty"
-backup_and_prepare "$GHOSTTY_CONFIG"
-download "$DOTFILES/ghostty/config.ghostty" "$GHOSTTY_CONFIG/config"
+install_ghostty_config() {
+    local ghostty_config="$HOME/.config/ghostty"
 
-# Set fish as Ghostty's default shell so shell integration is auto-injected.
-# Only appended if the config doesn't already define a command.
-if ! grep -q "^command" "$GHOSTTY_CONFIG/config" 2>/dev/null; then
-    printf "\ncommand = %s\n" "$(which fish)" >> "$GHOSTTY_CONFIG/config"
-fi
-success "Ghostty config installed (fish set as default shell)"
+    backup_and_prepare "$ghostty_config"
+    download "$DOTFILES/ghostty/config.ghostty" "$ghostty_config/config"
+
+    if command -v fish &>/dev/null; then
+        if ! grep -q "^command" "$ghostty_config/config" 2>/dev/null; then
+            printf "\ncommand = %s\n" "$(which fish)" >> "$ghostty_config/config"
+        fi
+
+        success "Ghostty config installed; fish set as default shell"
+    else
+        success "Ghostty config installed; fish not found, so default shell was not changed"
+    fi
+}
+
+install_vscode_config() {
+    local vscode_config
+
+    if is_macos; then
+        vscode_config="$HOME/Library/Application Support/Code/User"
+    else
+        vscode_config="$HOME/.config/Code/User"
+    fi
+
+    backup_and_prepare "$vscode_config"
+    download "$DOTFILES/Code/User/settings.json" "$vscode_config/settings.json"
+
+    success "VS Code settings installed"
+}
+
+install_neovim() {
+    if ! command -v nvim &>/dev/null; then
+        ensure_brew && brew install neovim
+    fi
+
+    success "Neovim ready"
+}
+
+install_codicons() {
+    ensure_npm
+
+    if command -v npm &>/dev/null; then
+        npm i --yes @vscode/codicons
+        success "VS Code Codicons installed"
+    else
+        error "npm is not available; skipping Codicons."
+    fi
+}
+
+install_neovim_config() {
+    local nvim_config="$HOME/.config/nvim"
+
+    backup_and_prepare "$nvim_config"
+    download "$DOTFILES/nvim/init.lua" "$nvim_config/init.lua"
+
+    success "Neovim config installed"
+}
+
+install_pyright() {
+    if ! command -v pyright &>/dev/null; then
+        ensure_brew && brew install pyright
+    fi
+
+    success "Pyright ready"
+}
+
+install_pi_agent() {
+    ensure_npm
+
+    if command -v npm &>/dev/null; then
+        npm install --yes -g @earendil-works/pi-coding-agent
+        success "pi coding agent installed"
+    else
+        error "npm is not available; skipping pi coding agent."
+    fi
+}
+
+install_pi_agent_config() {
+    local pi_config="$HOME/.pi/agent"
+    local pi_tmp
+
+    backup_and_prepare "$pi_config"
+
+    pi_tmp=$(mktemp -d)
+    git clone --depth 1 --branch "$DOTFILES_BRANCH" "$DOTFILES_REPO" "$pi_tmp"
+
+    if [ -d "$pi_tmp/.pi/agent" ]; then
+        cp -r "$pi_tmp/.pi/agent/." "$pi_config/"
+        success "pi agent config installed"
+    else
+        error "Could not find .pi/agent in dotfiles repo — skipping"
+    fi
+
+    rm -rf "$pi_tmp"
+}
 
 # ─────────────────────────────────────────────
-# VS Code
+# Main
 # ─────────────────────────────────────────────
 
-step "VS Code config"
-if is_macos; then
-    VSCODE_CONFIG="$HOME/Library/Application Support/Code/User"
-else
-    VSCODE_CONFIG="$HOME/.config/Code/User"
-fi
+main() {
+    parse_args "$@"
 
-backup_and_prepare "$VSCODE_CONFIG"
-download "$DOTFILES/Code/User/settings.json" "$VSCODE_CONFIG/settings.json"
-success "VS Code settings installed"
+    run_step "Set up Homebrew?" "Homebrew" setup_homebrew
+    run_step "Install Aporetic Nerd Font?" "Fonts" install_fonts
 
-# ─────────────────────────────────────────────
-# Neovim
-# ─────────────────────────────────────────────
+    run_step "Install Fish shell?" "Fish" install_fish
+    run_step "Install Fish config?" "Fish config" install_fish_config
+    run_step "Install Fisher and Fish plugins?" "Fisher & plugins" install_fisher_plugins
 
-step "Neovim"
-command -v nvim &>/dev/null || brew install neovim
-success "Neovim ready"
+    run_step "Install Ghostty?" "Ghostty" install_ghostty
+    run_step "Install Ghostty config?" "Ghostty config" install_ghostty_config
 
-step "npm & Codicons"
-command -v npm &>/dev/null || brew install npm
-success "npm ready"
+    run_step "Install VS Code config?" "VS Code config" install_vscode_config
 
-npm i --yes @vscode/codicons
-success "VS Code Codicons installed"
+    run_step "Install Neovim?" "Neovim" install_neovim
+    run_step "Install npm and VS Code Codicons?" "npm & Codicons" install_codicons
+    run_step "Install Neovim config?" "Neovim config" install_neovim_config
 
-step "Neovim config"
-NVIM_CONFIG="$HOME/.config/nvim"
-backup_and_prepare "$NVIM_CONFIG"
-download "$DOTFILES/nvim/init.lua" "$NVIM_CONFIG/init.lua"
-success "Neovim config installed"
+    run_step "Install Pyright LSP?" "Pyright" install_pyright
 
-# ─────────────────────────────────────────────
-# Python tooling
-# ─────────────────────────────────────────────
+    run_step "Install pi coding agent?" "pi coding agent" install_pi_agent
+    run_step "Install pi agent config?" "pi agent config" install_pi_agent_config
 
-step "Python tooling (uv, ruff, ty)"
-brew install uv ruff ty
-success "uv, ruff, and ty installed"
+    echo
+    echo "🎉 Setup complete! Restart your terminal to start using Fish."
+}
 
-step "Pyright (LSP)"
-command -v pyright &>/dev/null || brew install pyright
-success "Pyright ready"
-
-# ─────────────────────────────────────────────
-# pi coding agent
-# ─────────────────────────────────────────────
-
-step "pi coding agent"
-npm install --yes -g @earendil-works/pi-coding-agent
-success "pi coding agent installed"
-
-step "pi agent config"
-PI_CONFIG="$HOME/.pi/agent"
-backup_and_prepare "$PI_CONFIG"
-PI_TMP=$(mktemp -d)
-git clone --depth 1 --branch "$DOTFILES_BRANCH" "$DOTFILES_REPO" "$PI_TMP"
-if [ -d "$PI_TMP/.pi/agent" ]; then
-    cp -r "$PI_TMP/.pi/agent/." "$PI_CONFIG/"
-    success "pi agent config installed"
-else
-    error "Could not find .pi/agent in dotfiles repo — skipping"
-fi
-rm -rf "$PI_TMP"
-
-# ─────────────────────────────────────────────
-
-echo
-echo "🎉 Setup complete! Restart your terminal to start using Fish."
+main "$@"

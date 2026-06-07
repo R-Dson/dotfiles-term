@@ -1,16 +1,62 @@
-# TDD Session Summary
+# TDD session summary
 
-**Task**: [Task name]
-**Framework**: [e.g., Vitest]
+**Task:** <task name>
+**Framework:** <test framework>
+**Status:** <red | green | complete>
 
-## Results
-- **Tests Added**: [list files]
-- **Implementation**: [list files]
-- **Final Command**: [command]
+## Behavior
 
-## Evidence
+<behavior implemented or under test>
+
+## Files changed
+
+### Tests
+
+- `<path>`
+
+### Implementation
+
+- `<path>`
+
+## Commands
+
+### Red
+
 ```bash
-[Paste passing test output here]
+<command>
+````
+
+Expected failure:
+
+```text
+<failure reason>
 ```
 
-Verification Status: ✅ ALL TESTS PASSING
+### Green
+
+```bash
+<command>
+```
+
+Passing result:
+
+```text
+<summary>
+```
+
+### Final verification
+
+```bash
+<command>
+```
+
+Result:
+
+```text
+<summary>
+```
+
+## Notes
+
+* <assumptions, skipped checks, risks, or follow-up items>
+
