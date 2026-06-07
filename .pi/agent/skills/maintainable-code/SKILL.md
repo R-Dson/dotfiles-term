@@ -1,265 +1,297 @@
 ---
 name: maintainable-code
-description: >
-  Apply this skill when asked to write, review, refactor, or evaluate any code
-  for quality, clarity, or maintainability. Triggers include: "review my code",
-  "refactor this", "is this good practice", "how should I structure this",
-  "write clean code for...", or any code generation task where maintainability
-  is implied. Also apply proactively whenever you generate non-trivial code —
-  these rules are defaults, not optional.
+description: Applies maintainability standards when writing, reviewing, refactoring, or evaluating code. Use for code generation, code review, refactoring, architecture cleanup, test quality checks, or questions like "is this good practice?" Apply proactively for non-trivial code.
+disable-model-invocation: false
 ---
 
-# Maintainable Code Skill
+# Maintainable code
 
 ## Purpose
 
-Produce code that the next reader can understand, modify, and trust — without needing to ask the original author. Apply every rule below when writing or reviewing code. When refactoring, apply them incrementally without breaking behavior.
+Produce code that future maintainers can understand, modify, test, and trust. Prefer clear, boring, idiomatic code over cleverness. Improve code incrementally without changing behavior unless the task explicitly requires a behavior change.
+
+## When to use
+
+Use this skill when asked to:
+
+- Write non-trivial code.
+- Review code quality.
+- Refactor existing code.
+- Evaluate maintainability.
+- Improve structure, naming, tests, or error handling.
+- Decide whether code is clean enough to ship.
+
+Do not use this skill as the primary guide for:
+
+- Security-specific audits.
+- Performance benchmarking.
+- API documentation.
+- Commit message formatting.
+- Architecture planning beyond local code structure.
 
 ---
 
-## Core Rules (Apply Always)
+## Operating workflow
 
-### 1. Naming
+1. **Understand intent**
+   - Identify the behavior the code must provide.
+   - Read nearby code to match project conventions.
+   - Check existing tests, types, and error-handling patterns.
 
-- Every identifier must answer: *what is it, what does it do, why does it exist* — without a comment
-- Use full words. No abbreviations unless they are universally understood in the domain (`url`, `id`, `http`)
-- Single-letter names only in loop indices (`i`, `j`, `k`) or very short closures with obvious types
-- One word per concept, used consistently everywhere. Never mix synonyms for the same thing (`fetch`/`get`/`retrieve` for the same operation)
-- Boolean identifiers: prefix with `is`, `has`, `can`, `should`
-- Constants: name for *purpose*, not *value* (`MAX_RETRY_COUNT = 3`, not `THREE = 3`)
-- Encode units of measure in names when not captured by types: `timeoutMilliseconds`, `distanceMeters`
-- Names must be honest: if a function has side effects, the name must reveal them
-- Never create look-alike names differing only in case, one character, or an underscore
+2. **Design for change**
+   - Keep responsibilities small.
+   - Keep boundaries explicit.
+   - Prefer simple composition over inheritance or hidden coupling.
+   - Avoid abstractions until the pattern is real.
 
-### 2. Function Design
+3. **Implement clearly**
+   - Use intention-revealing names.
+   - Keep functions focused.
+   - Validate at trust boundaries.
+   - Handle error paths explicitly.
+   - Remove duplication when it represents the same concept.
 
-- One function, one responsibility. If you cannot describe it in one sentence without "and", split it
-- Target 5–20 lines per function. Exceed this only with justification
-- If a function requires section-dividing comments, extract each section into a named function instead
-- No hidden side effects in functions named as queries (`isValid`, `getUser` should not write to a database)
-- Validate inputs at the top with guard clauses; fail fast with a clear error
-- Handle every error path explicitly. Swallowing errors is never acceptable without a comment explaining why
+4. **Verify**
+   - Add or update meaningful tests.
+   - Run relevant test, lint, typecheck, or build commands when available.
+   - Confirm no secrets, dead code, or accidental behavior changes were introduced.
 
-### 3. No Duplication (DRY)
-
-- Every fact, constant, and piece of logic exists in exactly one place
-- Extract shared logic before the second use, not the third
-- Magic numbers and magic strings become named constants at first use
-- Do not force premature abstractions. Two similar pieces of code serving different purposes may legitimately stay separate until the pattern is stable
-
-### 4. Comments
-
-- Comments explain *why*, never *what* (the code explains what)
-- A comment explaining what the code does is a signal to refactor the code, not to keep the comment
-- Stale comments are bugs. Update or delete them when you change the code
-- Never leave commented-out code. Delete it; version control preserves history
-- Document every public interface: parameters (with units and constraints), return value, errors/exceptions raised, preconditions
-
-### 5. Error Handling
-
-- Every error path is intentional and explicit
-- Use the language's idiomatic error type (typed exceptions, Result/Either types, error codes) — never `null` as a signal
-- Log errors with context: what was attempted, what the inputs were, what the error was
-- Never use exceptions for normal control flow
-- Validate at system boundaries (API, UI, file parser), not deep inside business logic
-
-### 6. No Magic Numbers or Strings
-
-- Replace every literal number or string with a named constant or enumeration at its first use
-- Group related constants into enumerations or namespaced objects
-- If a constant appears in more than one file, it must be defined centrally
+5. **Report**
+   - Summarize maintainability improvements.
+   - Mention verification performed.
+   - Call out any tradeoffs or follow-up risks.
 
 ---
 
-## Design Rules (Apply When Structuring Modules and Classes)
+## Core rules
 
-### 7. Single Responsibility
+### Naming
 
-- Every module, class, and function has exactly one reason to change
-- When a class is doing unrelated things, split it
+- Names must reveal purpose without requiring a comment.
+- Use full words unless the abbreviation is standard in the domain, such as `id`, `url`, `http`, or `api`.
+- Use one term consistently for one concept.
+- Boolean names should usually start with `is`, `has`, `can`, `should`, or `supports`.
+- Include units in names when the type does not express them, such as `timeoutMilliseconds`.
+- Function names must reveal side effects. A query-like name such as `getUser` or `isValid` should not write state.
+- Avoid look-alike names that differ only by case, one character, or an underscore.
 
-### 8. Encapsulation
+### Functions
 
-- Default to the most restrictive visibility available; widen only when there is an explicit external need
-- Never expose internal state directly through public fields
-- Design interfaces from the caller's perspective, not the implementer's
+- A function should do one thing at one level of abstraction.
+- If a function needs section comments, extract named helper functions instead.
+- Prefer guard clauses over deep nesting.
+- Keep parameter lists short; introduce an options object or domain type when parameters become hard to read.
+- Keep side effects explicit and close to the boundary where they occur.
+- Do not swallow errors silently.
 
-### 9. Prefer Composition Over Deep Inheritance
+### Duplication
 
-- Limit inheritance to 2–3 levels. Deeper hierarchies almost always indicate a design problem
-- Use interfaces, protocols, or traits to share behavior without creating inheritance dependencies
-- Avoid God classes. A class that knows everything about the system is a single point of fragility
+- Remove duplication when two pieces of code represent the same business rule, constant, or behavior.
+- Do not create premature abstractions for code that only looks similar but serves different purposes.
+- Extract shared concepts once the naming and behavior are stable.
+- Replace unclear magic values with named constants.
+- Keep shared constants in one central place when used across files.
 
-### 10. Dependency Direction
+### Comments and documentation
 
-- High-level modules (business logic) depend on abstractions, not on concrete low-level implementations
-- Low-level modules (infrastructure, I/O, external services) implement the abstractions defined by high-level modules
-- This makes the core logic testable without real infrastructure
+- Comments should explain why, not restate what the code does.
+- A comment that explains confusing code is often a refactoring signal.
+- Delete commented-out code.
+- Update or remove stale comments when changing behavior.
+- Public interfaces should document constraints, units, errors, and non-obvious behavior when the type system does not make them clear.
 
----
+### Error handling
 
-## Testing Rules (Apply When Writing or Reviewing Tests)
+- Validate input at system boundaries: API handlers, UI forms, file parsers, CLI inputs, queues, and external integrations.
+- Use the project’s idiomatic error pattern: exceptions, result types, error codes, or typed failures.
+- Include enough context in logs to debug the failure without exposing secrets.
+- Do not use exceptions for normal control flow.
+- Do not return `null` or `undefined` as an error signal unless that is the established project convention and the caller handles it explicitly.
 
-### 11. Test Coverage
+### Secrets and sensitive data
 
-- New code is accompanied by tests at the appropriate level (unit, integration, end-to-end)
-- Test the happy path, the error paths, and the boundary conditions
-- A function that is hard to test is probably poorly designed — redesign before adding workarounds
-
-### 12. Test Quality
-
-- Every test asserts a specific, meaningful behavior — not just that a line was executed
-- Tests must be deterministic. A test that sometimes fails is worse than no test; it trains developers to ignore failures
-- Do not write tests to hit a coverage number. Empty assertions are noise
-
-### 13. Test Structure
-
-- Follow Arrange / Act / Assert (or Given / When / Then) within every test
-- One behavior per test. If a test needs a long name joined by "and", split it
-- Tests should not share mutable state; each test sets up its own preconditions
-
----
-
-## Process Rules (Apply at Commit and Review Time)
-
-### 14. Commit Discipline
-
-- Each commit is one logical change. Do not mix refactoring with behavior changes in the same commit
-- Commit messages: `type: imperative summary` followed by a body explaining *why*
-- Reference issue tracker tickets in the message body
-
-### 15. No Warnings
-
-- Code passes the project linter with zero warnings
-- Code is formatted by the project formatter
-- Compiler or interpreter warnings are treated as errors in CI
-
-### 16. Secrets
-
-- No secrets (API keys, passwords, tokens, certificates) in code or commit history, ever
-- All sensitive configuration is injected via environment variables or a secrets manager
-
-### 17. Dependencies
-
-- Dependencies are pinned to specific versions
-- Dependencies are scanned for known vulnerabilities in CI
-- Standard library functions are used before rolling custom implementations
+- Never hardcode API keys, tokens, passwords, certificates, private keys, or production credentials.
+- Do not log secrets, session cookies, authorization headers, or sensitive personal data.
+- Use the project’s approved configuration or secrets-management mechanism.
+- Treat accidental secret exposure as a blocking issue.
 
 ---
 
-## Refactoring Rules (Apply When Improving Existing Code)
+## Design rules
 
-### 18. Boy Scout Rule
+### Responsibility and boundaries
 
-- Every time you touch a file, leave it slightly cleaner than you found it
-- Rename an unclear variable, extract a complex condition, delete a stale comment — small improvements compound
+- Each module, class, and function should have one clear reason to change.
+- Keep business logic separate from I/O, framework code, persistence, and external services when practical.
+- High-level logic should depend on interfaces or abstractions, not concrete infrastructure.
+- Avoid circular dependencies.
+- Keep public APIs small and intentional.
 
-### 19. Safe Refactoring Sequence
+### Composition
 
-1. Confirm the code under refactoring is covered by tests
-2. Make the structural change
-3. Verify all tests pass
-4. Commit — separate from any behavior change
+- Prefer composition, interfaces, protocols, or small collaborators over deep inheritance.
+- Avoid god classes and catch-all utility modules.
+- Avoid global mutable state unless the project architecture explicitly requires it.
 
-### 20. Delete Dead Code
+### Data modeling
 
-- Unused functions, unreachable branches, commented-out blocks, and orphaned modules are deleted without hesitation
-- Version control preserves history. Dead code left in place is misleading noise
+- Use domain types for important concepts instead of unstructured primitives.
+- Avoid passing unrelated primitive values together when an object or type would make the contract clearer.
+- Make invalid states hard to represent when the language allows it.
 
-### 21. Recognize Code Smells and Act
+---
 
-| Smell | Action |
+## Testing rules
+
+### Coverage
+
+- New behavior should include tests at the appropriate level: unit, integration, or end-to-end.
+- Cover happy paths, important error paths, and boundary conditions.
+- A hard-to-test function may be a design smell.
+
+### Quality
+
+- Tests should assert meaningful behavior, not implementation details.
+- Tests must be deterministic and isolated.
+- Avoid tests that exist only to raise coverage numbers.
+- Use Arrange / Act / Assert or Given / When / Then where it improves clarity.
+- Keep one behavior per test when practical.
+
+---
+
+## Refactoring rules
+
+Refactoring means changing internal structure without changing observable behavior.
+
+Use this safe sequence:
+
+1. Confirm current behavior with existing or added tests.
+2. Make one structural change.
+3. Run relevant verification.
+4. Keep behavior changes separate from refactoring changes.
+
+Good refactoring targets:
+
+- Rename unclear identifiers.
+- Extract complex conditions.
+- Split long functions.
+- Remove dead code.
+- Replace duplicated logic with a shared function or type.
+- Replace primitive obsession with a domain type.
+- Isolate side effects from core logic.
+
+Do not mix large refactors with feature changes unless the user explicitly asks and the risk is explained.
+
+---
+
+## Code smells and responses
+
+| Smell | Response |
 |---|---|
-| Function >50 lines | Extract by responsibility |
-| Class >500 lines | Apply Single Responsibility |
-| Parameter list >4 items | Introduce a parameter object |
-| Duplicate logic | Extract to shared function |
-| Deep nesting >3 levels | Extract functions; invert conditions |
-| Comment explaining *what* | Refactor until the code is self-documenting |
-| Magic number or string | Replace with named constant |
-| Primitive used for domain concept | Introduce a domain type |
+| Long function | Extract helpers by responsibility |
+| Large class or module | Split by reason to change |
+| Long parameter list | Introduce options object or domain type |
+| Duplicate business logic | Extract shared rule |
+| Deep nesting | Use guard clauses or extracted functions |
+| Comment explains what | Rename or refactor |
+| Magic value | Introduce named constant when meaning is not obvious |
+| Primitive used for domain concept | Introduce domain type |
+| Dead code | Delete it |
+| Global mutable state | Pass state explicitly or isolate it |
+| Hidden side effect | Rename or move side effect to boundary |
+| Flaky test | Remove nondeterminism or isolate dependencies |
 
 ---
 
-## Architecture Rules (Apply When Designing Systems)
+## Dependency rules
 
-### 22. Clear Boundaries
-
-- Every system has identifiable modules with explicit responsibilities and explicit interfaces between them
-- Each module depends only on modules at the same or lower level of abstraction
-- Circular dependencies are not permitted
-
-### 23. Document Decisions
-
-- Every significant architectural decision is recorded in an Architecture Decision Record (ADR)
-- An ADR captures: context, decision, alternatives considered, and consequences
-- ADRs live in the repository alongside the code they describe
-
-### 24. Observability
-
-- All significant operations are logged with structured, machine-parseable output
-- Key operations are instrumented with metrics
-- Errors are surfaced through alerts before users report them
+- Prefer standard library or existing project utilities before adding dependencies.
+- Add a dependency only when it materially reduces complexity or risk.
+- Use pinned or lockfile-managed versions according to the project’s package manager.
+- Avoid dependencies with unclear maintenance, licensing, or security posture.
+- Do not introduce a dependency for a small function the standard library already provides.
 
 ---
 
-## What to Avoid (Anti-Patterns from Green's Guide — Inverted)
+## Review checklist
 
-| Green's Anti-Pattern | Correct Practice |
-|---|---|
-| Single-letter variables | Intention-revealing names |
-| Creative misspellings | Correct, consistent spelling |
-| Thesaurus synonyms for same concept | One word per concept |
-| Lie in comments | Accurate comments, or no comment |
-| Document the obvious; hide the important | Document *why*; make *what* self-evident in code |
-| Specify facts in as many places as possible | Every fact in exactly one place (DRY) |
-| Never validate inputs | Validate at every trust boundary |
-| Avoid assertions | Assert preconditions; fail fast |
-| Never test | Comprehensive, meaningful tests |
-| Suppress compiler warnings | Zero warnings; warnings are errors in CI |
-| Use global variables everywhere | Pass state explicitly; avoid globals |
-| Reinvent standard library functions | Use the standard library |
-| Mix refactoring with behavior changes | Separate commits for each |
-| Keep secrets from colleagues | Communicate known problems immediately |
-| Deep inheritance hierarchies | Composition; interfaces; 2–3 level limit |
-| God classes that do everything | Small, focused classes with one responsibility |
-| Magic numbers | Named constants |
-| Commented-out code | Delete it; trust version control |
-| Make builds undocumented and fragile | Reproducible, documented, CI-verified builds |
+Use this checklist when reviewing or finishing non-trivial code.
+
+### Naming
+
+- [ ] Names reveal intent.
+- [ ] Terms are consistent across the codebase.
+- [ ] Units are encoded in names or types.
+- [ ] Boolean names read naturally.
+- [ ] Side effects are visible from names.
+
+### Structure
+
+- [ ] Functions have one responsibility.
+- [ ] Nesting is shallow enough to read.
+- [ ] Boundaries between business logic and infrastructure are clear.
+- [ ] No unnecessary abstraction was introduced.
+- [ ] No circular dependency was introduced.
+
+### Correctness and errors
+
+- [ ] Inputs are validated at trust boundaries.
+- [ ] Error paths are explicit.
+- [ ] Logs include useful context without secrets.
+- [ ] No behavior changed accidentally during refactoring.
+
+### Tests
+
+- [ ] New or changed behavior is covered.
+- [ ] Error and boundary cases are covered where relevant.
+- [ ] Tests are deterministic.
+- [ ] Tests assert behavior, not incidental implementation.
+
+### Maintenance
+
+- [ ] Duplication is intentional or removed.
+- [ ] Magic values are named when meaning is not obvious.
+- [ ] Dead or commented-out code is removed.
+- [ ] Public interfaces document non-obvious constraints.
+- [ ] Dependencies are justified.
+
+### Process
+
+- [ ] Formatter, linter, typecheck, build, or tests pass when available.
+- [ ] Refactoring and behavior changes are kept separate where practical.
+- [ ] No secrets or sensitive data are present.
 
 ---
 
-## Checklist (Use at Review Time)
+## Output contract
 
-**Naming**
-- [ ] Every identifier reveals intent without a comment
-- [ ] Consistent with project conventions and glossary
-- [ ] Units encoded in names or types
-- [ ] Boolean identifiers use is/has/can/should prefix
+When writing or refactoring code, report:
 
-**Structure**
-- [ ] Each function has one responsibility
-- [ ] No function is unreasonably long
-- [ ] No duplicated logic
-- [ ] All magic numbers replaced by named constants
-- [ ] All inputs validated at entry points
-- [ ] All error paths handled explicitly
+```text
+Changed:
+- <files or areas changed>
 
-**Documentation**
-- [ ] Comments explain *why*, not *what*
-- [ ] All public interfaces documented
-- [ ] No stale comments
-- [ ] No commented-out code
+Why:
+- <maintainability reason>
 
-**Testing**
-- [ ] New behavior is covered by tests
-- [ ] Error and edge cases tested
-- [ ] All tests pass and are deterministic
-- [ ] No tests exist solely for coverage metrics
+Verified:
+- <tests, lint, typecheck, build, or inspection performed>
 
-**Process**
-- [ ] Zero linter warnings
-- [ ] Code is formatted
-- [ ] Commit message explains what and why
-- [ ] No secrets in code or history
-- [ ] Dependencies pinned and scanned
+Notes:
+- <tradeoffs, assumptions, or follow-up risks>
+````
+
+When reviewing code, report only actionable findings:
+
+```text
+Findings:
+- <location>: <issue> — <impact> → <specific fix>
+
+Looks good:
+- <specific strengths, if useful>
+
+Verdict:
+- <ship / ship after fixes / do not ship>
+```
+
+Do not report style preferences, formatter issues, speculative concerns, or rewrites that are unrelated to the requested change.
