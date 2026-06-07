@@ -1,33 +1,113 @@
-# Green & Refactor Phase Procedures
+# Green and refactor phase
 
-## 1. The Green Phase (Implementation)
-The goal is to move from Red to Green as quickly as possible.
+## Purpose
 
-### Tactics:
-- **Minimalism**: Write only the code required to make the test pass. If you can make it pass by returning a hardcoded value (and that satisfies the current test), do it. You will generalize it with the next test.
-- **Stay in Scope**: Do not fix unrelated bugs or add extra features you "know" you will need later.
-- **Verification**: Run the specific test command frequently.
-
-### Transition:
-Once the test passes, you are in the "Green" state. Do not move to the next feature until you have Refactored.
+Move from a meaningful failing test to a passing test with the smallest useful implementation, then improve the design without changing behavior.
 
 ---
 
-## 2. The Refactor Phase (Cleanup)
-The goal is to improve the internal structure of the code without changing its external behavior.
+## Green phase
 
-### Rules:
-- **Always Green**: If a test fails during refactoring, you have broken the behavioral contract. Undo and try a smaller step.
-- **DRY (Don't Repeat Yourself)**: Look for duplication introduced during the "Green" phase.
-- **Naming**: Ensure variable and function names clearly describe their intent.
-- **Consistency**: Ensure the new code matches the project's existing patterns (e.g., error handling style, async/await vs promises).
+### Goal
 
-### Red Flags (What to remove):
-- Hardcoded values used for "faking it" in the Green phase.
-- Comments that explain "what" the code does (the code should be self-explanatory).
-- Large functions that can be broken into smaller, testable units.
+Make the failing test pass with minimal production code.
 
-## 3. Git Checkpoint
-After achieving a clean Green state:
-- Stage your changes: `git add .`
-- Commit with a descriptive message: `feat: implement <feature_name> and refactor logic`
+### Rules
+
+- Implement only the behavior covered by the current failing test.
+- Stay inside the scope defined by the Red handoff unless a small supporting change is necessary.
+- Avoid unrelated cleanup, features, or opportunistic fixes.
+- Do not weaken or rewrite the test to make it pass.
+- Run the narrow test command frequently.
+- Stop once the test passes.
+
+### Minimal implementation guidance
+
+Minimal does not mean careless. It means:
+
+- No speculative options.
+- No unused extension points.
+- No broad rewrites.
+- No premature abstraction.
+- No unrelated behavior.
+
+A hardcoded value is acceptable only when it expresses the current test’s simplest behavior and will be generalized by the next test. Remove or generalize hardcoded behavior once additional tests require it.
+
+### Green completion
+
+Green is complete when:
+
+```text
+- The Red test passes.
+- The implementation is scoped to the behavior.
+- No test was weakened.
+- No unrelated behavior was added.
+````
+
+---
+
+## Refactor phase
+
+### Goal
+
+Improve internal structure while preserving external behavior.
+
+### Rules
+
+* Keep tests green.
+* Make one structural improvement at a time.
+* Run the relevant test after meaningful changes.
+* Do not add behavior during refactor.
+* Revert or shrink the step if tests fail.
+
+### Good refactor targets
+
+* Rename unclear variables or functions.
+* Extract duplicated logic.
+* Split large functions.
+* Replace confusing conditionals with named helpers.
+* Align with project error-handling style.
+* Move code to a more appropriate module.
+* Remove temporary hardcoding introduced during Green.
+* Delete obsolete comments or debug output.
+
+### Stop refactoring when
+
+* The code is clear enough for the current change.
+* Further cleanup would expand scope.
+* More refactoring needs a separate task.
+* Tests are green and the implementation is maintainable.
+
+---
+
+## Git checkpoint
+
+Commit only when requested or when the current workflow expects commits.
+
+Before committing:
+
+```bash
+git status --short
+git diff
+git diff --staged
+```
+
+Use an atomic Conventional Commit message:
+
+```bash
+git add <files>
+git commit -m "feat(<scope>): add <behavior>"
+```
+
+For bug fixes:
+
+```bash
+git commit -m "fix(<scope>): handle <case>"
+```
+
+Do not use a generic message such as:
+
+```bash
+git commit -m "feat: implement feature and refactor logic"
+```
+
