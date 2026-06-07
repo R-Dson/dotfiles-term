@@ -4,7 +4,7 @@ description: Implements features, bug fixes, and behavior changes using the Red-
 disable-model-invocation: false
 ---
 
-# Test-driven development
+# TDD
 
 ## Purpose
 
@@ -40,7 +40,7 @@ references/RED_PHASE.md
 references/GREEN_REFACTOR.md
 references/VERIFICATION.md
 references/ANTI_PATTERNS.md
-````
+```
 
 Use this asset for handoff summaries:
 

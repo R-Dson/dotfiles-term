@@ -1,10 +1,10 @@
 ---
-name: doc-architect
+name: docs
 version: 1.1.0
 description: Creates, updates, and audits developer documentation such as READMEs, API docs, tutorials, architecture docs, runbooks, ADRs, and contribution guides. Use when the user asks to document, explain, write a guide, update docs, improve a README, create API documentation, or audit documentation quality. Do not use for inline code comments or commit messages.
 ---
 
-# doc-architect
+# Docs
 
 ## Purpose
 
@@ -39,7 +39,7 @@ Before writing or auditing documentation, load:
 
 ```text
 references/style-guide.md
-````
+```
 
 If the file is unavailable, continue with the core workflow and note that the style guide could not be loaded.
 

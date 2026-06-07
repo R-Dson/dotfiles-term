@@ -1,6 +1,6 @@
 ---
 name: research
-description: Firecrawl-first research and search workflow for quick lookups, documentation discovery, error debugging, source verification, community-signal analysis, and deep technical research briefs. Use when current or niche information is needed, when searching official docs, scraping pages, mapping documentation sites, comparing tools, or producing cited research.
+description: Firecrawl-first workflow for web search, documentation lookup, error debugging, source verification, comparisons, and cited technical research. Use when current, niche, version-specific, or externally verifiable information is needed.
 disable-model-invocation: false
 ---
 
@@ -8,457 +8,118 @@ disable-model-invocation: false
 
 ## Purpose
 
-Use Firecrawl-first research workflows to find accurate, current, high-signal information with minimal tool calls. Prefer primary sources, scrape only what is useful, cite evidence, and distinguish facts from inference.
+Find accurate, current, high-signal information with minimal browsing. Prefer primary sources, scrape only useful pages, cite evidence, and separate facts from inference.
 
 ## When to use
 
-Use this skill when the task requires:
+Use this skill for:
 
-- Web search.
-- Firecrawl search, scrape, map, crawl, or extraction.
-- Official documentation lookup.
-- API or library behavior.
-- Version-specific behavior.
-- Error-message debugging.
-- Technical comparison.
-- Ecosystem or community sentiment.
-- Changelog, release, or deprecation checks.
-- Security, legal, medical, financial, or other high-stakes verification.
-- A research brief or cited recommendation.
+- Web search or Firecrawl use.
+- Official documentation, API, changelog, release, or migration lookup.
+- Version-specific behavior or known error messages.
+- Technical comparisons and recommendations.
+- Ecosystem/community-signal checks.
+- Security, legal, medical, financial, production, or compliance-sensitive verification.
+- Deep research briefs.
 
-Do not use this skill when:
-
-- The answer can be derived entirely from user-provided text.
-- The user explicitly says not to browse or search.
-- The request is purely creative writing, rewriting, or translation.
-- The information is stable common knowledge and no verification is needed.
-
----
+Do not use when the answer is fully contained in local/user-provided context, the user says not to browse, or the task is purely creative rewriting.
 
 ## Research modes
 
 Choose the smallest mode that answers the request.
 
-### Quick lookup
+| Mode | Use for | Exit condition |
+|---|---|---|
+| Quick lookup | API signatures, CLI flags, simple how-to, known errors | One authoritative source answers it |
+| Verification | Current facts, dates, versions, prices, policies, safety/security impact | Current primary source confirms it |
+| Comparison | Libraries, tools, vendors, implementation options | Key tradeoffs supported by evidence |
+| Deep research | Landscape survey or durable recommendation | Brief saved under `.pi/research/` |
 
-Use for:
+## Local-first rule
 
-- Function signatures.
-- CLI flags.
-- Known error messages.
-- Simple how-to questions.
-- Version-specific API behavior.
-
-Stop when one authoritative source answers the question.
-
-### Verification
-
-Use when:
-
-- The user asks whether something is current or correct.
-- A fact may have changed.
-- The answer involves a date, version, role, price, law, policy, or release.
-- The answer affects money, safety, production systems, compliance, or security.
-
-Find the current primary source and cite it.
-
-### Comparison
-
-Use when comparing:
-
-- Libraries.
-- Frameworks.
-- APIs.
-- Tools.
-- Vendors.
-- Implementation approaches.
-
-Use official docs for capabilities, changelogs for freshness, and issues/forums for pain points.
-
-### Deep research
-
-Use when the user asks to:
-
-- Explore.
-- Investigate.
-- Deep dive.
-- Survey a landscape.
-- Produce a recommendation.
-- Create a reusable research artifact.
-
-Create a research brief at:
+For project-specific questions, inspect local context before browsing:
 
 ```text
-.pi/research/research-brief-<topic>.md
-````
+README.md, docs/, .pi/research/, ARCHITECTURE.md
+package.json, pyproject.toml, Cargo.toml, go.mod, requirements.txt, lockfiles
+```
 
----
+Use local versions, dependencies, and architecture to shape queries and avoid duplicate research.
 
-## Firecrawl tool strategy
+## Firecrawl strategy
 
-Use Firecrawl as the default web-research path.
+Available tools: `firecrawl_search`, `firecrawl_scrape`, `firecrawl_map`.
 
-### `firecrawl_search`
-
-Use when:
-
-* You need to discover pages.
-* The user gives a topic, error message, library, or comparison.
-* You need snippets, summaries, or top candidate sources.
-* You want search results plus scraped markdown in one call.
-
-Good for:
+Use the lightest tool first:
 
 ```text
-"exact error message" next.js 15
+search → scrape exact page → map docs root if exact page is unknown
+```
+
+### Search
+
+Use `firecrawl_search` to discover pages from a topic, error, library, API, or comparison.
+
+Good query patterns:
+
+```text
 site:react.dev useActionState
-postgres jsonb gin index performance official docs
-zustand jotai redux toolkit comparison github issues
-```
-
-When supported, request markdown or summary formats for high-value results.
-
-### `firecrawl_scrape`
-
-Use when:
-
-* You have a specific URL.
-* You need exact content from a page.
-* A search result looks authoritative and relevant.
-* You need clean markdown from docs, changelogs, blog posts, or public PDFs.
-
-Default scrape behavior:
-
-```text
-formats: ["markdown"]
-onlyMainContent: true
-```
-
-Use stronger cleaning or extraction only when the returned page has boilerplate, nav clutter, comments, or repeated unrelated sections.
-
-### `firecrawl_map`
-
-Use when:
-
-* You have a documentation root and need the right page.
-* The exact URL is unknown.
-* A docs site has many nested pages.
-* You need to discover API reference pages, changelogs, migration guides, or examples.
-
-Use `map` before scraping large documentation sites.
-
-Do not scrape a docs homepage or index page repeatedly if mapping can locate the specific page.
-
-### `firecrawl_crawl`
-
-Use when:
-
-* A full section or small documentation area must be collected.
-* Multiple linked pages are needed for a deep research artifact.
-* You need an overview of a bounded docs subtree.
-
-Before crawling:
-
-* Set a narrow URL scope.
-* Set sensible page limits.
-* Avoid crawling an entire domain unless explicitly required.
-* Prefer `map` plus targeted `scrape` when fewer pages are enough.
-
-### Firecrawl extraction
-
-Use structured extraction when:
-
-* You need repeatable fields from one or more pages.
-* You are collecting pricing, release metadata, API method names, changelog entries, or comparison tables.
-* A research artifact needs structured evidence.
-
-Define the desired schema before extraction.
-
-Do not use LLM extraction when simple markdown scraping is enough.
-
----
-
-## Firecrawl escalation pattern
-
-Use the lightest operation first.
-
-```text
-search → scrape → map → crawl → extract
-```
-
-Typical flows:
-
-### Specific API or function
-
-```text
-firecrawl_search "site:<official-docs-domain> <api/function/version>"
-→ firecrawl_scrape exact docs page
-→ answer with citation
-```
-
-If the exact page is hard to find:
-
-```text
-firecrawl_map official docs root
-→ identify exact page
-→ firecrawl_scrape exact page
-```
-
-### Known error message
-
-```text
-firecrawl_search "\"<exact error>\" <framework/library/version>"
-→ prefer official docs or GitHub issue
-→ scrape top authoritative result
-→ answer with cause, fix, and source
-```
-
-### Documentation site discovery
-
-```text
-firecrawl_map docs root
-→ scrape specific pages only
-→ synthesize answer
-```
-
-### Deep research
-
-```text
-local project check
-→ firecrawl_search broad landscape queries
-→ firecrawl_map official docs roots when needed
-→ firecrawl_scrape selected primary pages
-→ scrape GitHub issues/community sources for gotchas
-→ synthesize research brief
-```
-
----
-
-## Search query rules
-
-Write specific queries with product, version, error, API, and context terms.
-
-Good:
-
-```text
-react 19 useActionState official docs
-next.js 15 hydration mismatch github issue
-postgres jsonb gin index performance official docs
-vite 6 migration guide breaking changes
-```
-
-Poor:
-
-```text
-how to fix error
-javascript async problem
-best framework
-```
-
-For exact errors, quote the error:
-
-```text
 "Hydration failed because the initial UI does not match" Next.js
+vite 6 migration guide breaking changes
+site:github.com <library> <error> issue
 ```
 
-For official docs, bias toward the source:
+### Scrape
 
-```text
-site:react.dev useActionState
-site:nextjs.org hydration error
-site:docs.github.com code scanning alerts API
+Use `firecrawl_scrape` when you have a specific useful URL.
+
+Default options:
+
+```json
+{
+  "formats": ["markdown"],
+  "onlyMainContent": true
+}
 ```
 
-For GitHub issues:
+Scrape exact docs, changelogs, release notes, issues, or PDFs. Do not rescrape the same URL unless the first result was incomplete.
 
-```text
-site:github.com <library> <error or feature> issue
-```
+### Map
 
-For community sentiment:
+Use `firecrawl_map` for documentation roots when the exact page is unknown. Map first, then scrape only the relevant pages.
 
-```text
-site:reddit.com/r/reactjs Zustand Jotai Redux Toolkit 2026
-site:news.ycombinator.com <tool name> production
-```
-
----
-
-## Scraping rules
-
-Use scraping intentionally.
-
-Do:
-
-* Scrape the most specific authoritative page.
-* Use main-content extraction by default.
-* Prefer markdown output for reading and citation.
-* Scrape public PDFs when they are primary sources.
-* Avoid duplicate scrapes of the same URL.
-* Save or summarize only the relevant portions.
-
-Do not:
-
-* Scrape the same URL twice unless the first scrape was incomplete.
-* Scrape a whole docs site when one page answers the question.
-* Treat scraped community posts as authoritative facts.
-* Include nav, footers, ads, comments, or unrelated boilerplate in the answer.
-* Continue scraping after sufficient evidence is found.
-
-Soft limit:
-
-```text
-Quick lookup: 1-2 scraped pages
-Comparison: 3-6 primary pages plus selected issue/community sources
-Deep research: enough sources to support the recommendation, not every available page
-```
-
-If the answer is not found after targeted search and scraping, report what was checked and say `Not found`.
-
----
-
-## Documentation discovery
-
-When researching a technical product or library:
-
-1. Find the official docs root.
-2. Check for:
-
-   * API reference.
-   * Guides.
-   * Migration guide.
-   * Changelog.
-   * Release notes.
-   * Examples.
-   * `llms.txt` or `llms-full.txt`, if available.
-3. Use `firecrawl_map` to locate exact docs pages when needed.
-4. Scrape exact pages, not broad index pages.
-
-Treat `llms.txt` as a navigation aid, not as a substitute for reading source pages.
-
-Do not depend on deprecated or non-maintained Firecrawl alpha endpoints for `llms.txt` or deep research.
-
----
-
-## Local-first rule for project research
-
-Before web research for project-specific questions, inspect the workspace when available.
-
-Check for:
-
-```text
-README.md
-docs/
-.pi/research/
-ARCHITECTURE.md
-package.json
-pyproject.toml
-Cargo.toml
-go.mod
-requirements.txt
-lockfiles
-```
-
-Use local project facts to shape Firecrawl queries.
-
-Examples:
-
-* Detect framework and version before searching.
-* Detect package manager before recommending commands.
-* Check existing architecture decisions before suggesting a new stack.
-* Check `.pi/research/` before creating duplicate research.
-
----
+Do not crawl or scrape whole sites when one page or a small set of mapped pages is enough.
 
 ## Source priority
 
 Prefer sources in this order:
 
 1. Official documentation.
-2. Official changelogs, release notes, migration guides, and API references.
-3. Standards, specifications, RFCs, or vendor-maintained examples.
-4. Repository source code, README files, and merged pull requests.
-5. GitHub issues and discussions, especially closed or highly reacted issues.
-6. Stack Overflow answers with strong votes, recent activity, and accepted status.
-7. Community sources such as Reddit, Hacker News, Discord exports, and blog posts.
+2. Official changelogs, release notes, migration guides, API refs.
+3. Standards, specs, RFCs, or vendor-maintained examples.
+4. Repository source, README, merged PRs.
+5. GitHub issues/discussions with maintainer activity.
+6. Stack Overflow with strong votes and recent activity.
+7. Community sources for sentiment only.
 
-Avoid relying on:
+Avoid SEO farms, AI aggregators, unattributed tutorials, and stale blogs unless they provide unique firsthand evidence.
 
-* SEO content farms.
-* AI-generated aggregator sites.
-* Unattributed tutorials.
-* Outdated blog posts.
-* Medium/dev.to posts unless they provide unique firsthand evidence or are from a project maintainer.
+## Freshness and citations
 
-Community sources are useful for sentiment and hidden pain points, not as the sole source for factual claims.
+Check dates when accuracy depends on time: versions, API availability, deprecations, advisories, pricing, laws, roles, SaaS behavior, runtime/browser support, and best practices.
 
----
+Flag sources older than two years as `Potentially outdated` unless they are stable specs or historical context. If sources conflict, cite both and explain the disagreement.
 
-## Freshness rules
+Cite claims that are current, version-specific, contested, surprising, high-impact, or necessary for a recommendation. Label community sources as `Community signal, not official guidance`.
 
-Always check publication, update, release, or commit dates when accuracy depends on time.
+## Workflows and output contracts
 
-Treat these as freshness-sensitive:
-
-* Package versions.
-* API availability.
-* Deprecations.
-* Security advisories.
-* Pricing.
-* Laws and regulations.
-* Current maintainers or company roles.
-* SaaS product behavior.
-* Browser, runtime, or framework support.
-* Best-practice recommendations.
-
-Flag sources older than two years as:
-
-```text
-Potentially outdated
-```
-
-unless the source is a stable specification or historical reference.
-
-If sources disagree, cite both and explain the disagreement.
-
----
-
-## Citation rules
-
-Cite claims that are:
-
-* Current.
-* Version-specific.
-* Contested.
-* Surprising.
-* High-impact.
-* From a non-obvious source.
-* Needed for a recommendation.
-
-Do not cite every sentence. Cite the claims that carry the conclusion.
-
-When using community sources, label them clearly:
-
-```text
-Community signal, not official guidance
-```
-
-When making an inference, say so:
-
-```text
-Inference: ...
-```
-
-Then cite the evidence that supports it.
-
----
-
-## Quick lookup workflow
+### Quick lookup
 
 1. Identify the exact fact needed.
-2. Use `firecrawl_search` against official or primary sources.
-3. Use `firecrawl_scrape` on the most specific result.
-4. Verify version or context.
+2. Search official or primary sources.
+3. Scrape the most specific page.
+4. Verify version/context.
 5. Answer directly with citation.
 6. Stop.
 
@@ -475,171 +136,27 @@ Caveat:
 - <only if relevant>
 ```
 
----
-
-## Deep research workflow
-
-### Phase 1: Scope
-
-Define internally:
+### Known error
 
 ```text
-Research question:
-Decision to support:
-Current stack or constraints:
-Must-have criteria:
-Nice-to-have criteria:
-Exclusions:
-Freshness requirements:
-```
-
-Do not ask for clarification if a reasonable scope can be inferred.
-
-### Phase 2: Local check
-
-Inspect project files or previous research when available.
-
-Look for:
-
-* Existing decisions.
-* Existing dependencies.
-* Constraints.
-* Prior research.
-* Tests, build tooling, or architecture docs.
-
-### Phase 3: Firecrawl discovery
-
-Gather evidence from:
-
-* Official docs.
-* Changelogs and release notes.
-* API references.
-* Maintainer-authored posts.
-* GitHub issues or discussions.
-* Community sentiment sources.
-* Benchmarks only when methodology is clear.
-
-Use:
-
-```text
-firecrawl_search for discovery
-firecrawl_map for docs navigation
-firecrawl_scrape for exact evidence
-firecrawl_crawl for bounded multi-page research
-extract for structured fields
-```
-
-### Phase 4: Synthesis
-
-Compare options using criteria relevant to the decision.
-
-Possible criteria:
-
-* Fit for current stack.
-* Maintenance activity.
-* API stability.
-* Migration cost.
-* Performance.
-* Bundle size.
-* Security posture.
-* Ecosystem maturity.
-* Compatibility.
-* Learning curve.
-* Failure modes.
-* Known gotchas.
-
-### Phase 5: Artifact
-
-For deep research, create:
-
-```text
-.pi/research/research-brief-<topic>.md
-```
-
-Use this structure:
-
-```markdown
-# Research brief: <topic>
-
-## Executive summary
-
-<short recommendation and why>
-
-## Recommendation
-
-<recommended option or path>
-
-## Context
-
-<project constraints, versions, and assumptions>
-
-## Landscape
-
-| Option | Strengths | Weaknesses | Best fit |
-|---|---|---|---|
-
-## Evidence
-
-<claim-level findings with citations>
-
-## Gotchas
-
-<hidden limitations, migration risks, open issues, or community pain points>
-
-## Implementation path
-
-1. <first step>
-2. <second step>
-3. <verification step>
-
-## Sources
-
-- <source title> — <why it matters> — <date or “Potentially outdated”>
-```
-
----
-
-## Stop rules
-
-Stop researching when:
-
-* An official source directly answers the question.
-* Additional sources repeat the same fact.
-* The remaining uncertainty is not important to the decision.
-* The user asked for a quick lookup.
-
-Continue researching when:
-
-* Sources conflict.
-* The answer affects production, security, money, law, health, or compliance.
-* The user asked for a deep dive.
-* The first source is old, unofficial, or incomplete.
-* Version compatibility is unclear.
-
-If the answer cannot be found, say so and summarize what was checked.
-
----
-
-## Output contracts
-
-### Quick lookup
-
-```text
-Answer:
-- <direct answer>
-
-Evidence:
-- <source-backed detail>
-
-Caveat:
-- <only if relevant>
+search quoted exact error + framework/library/version
+→ prefer official docs or high-signal GitHub issue
+→ scrape authoritative result
+→ return likely cause, fix, and source
 ```
 
 ### Comparison
 
+1. Inspect local stack and constraints if available.
+2. Gather official docs/changelogs for each serious option.
+3. Add issue/community evidence only for gotchas and sentiment.
+4. Compare against decision criteria such as fit, migration cost, stability, performance, security, ecosystem, and failure modes.
+
+Output:
+
 ```text
 Recommendation:
-- <best option for the stated context>
+- <best option for stated context>
 
 Comparison:
 | Option | Best for | Tradeoffs | Evidence |
@@ -652,7 +169,32 @@ Sources:
 - <source list or citations>
 ```
 
-### Deep research handoff
+### Deep research
+
+Use when the user asks to explore, investigate, survey, deep dive, or create a durable recommendation.
+
+1. Define scope, decision, constraints, criteria, exclusions, and freshness needs.
+2. Inspect local project facts and existing `.pi/research/` briefs.
+3. Search and scrape primary sources; add community sources only when useful.
+4. Synthesize recommendation and evidence.
+5. Save brief to `.pi/research/research-brief-<topic>.md`.
+
+Brief structure:
+
+```markdown
+# Research brief: <topic>
+
+## Executive summary
+## Recommendation
+## Context
+## Landscape
+## Evidence
+## Gotchas
+## Implementation path
+## Sources
+```
+
+Output:
 
 ```text
 Research brief saved:
@@ -668,75 +210,10 @@ Open questions:
 - <remaining uncertainty, if any>
 ```
 
----
+## Stop rules
 
-## Examples
+Stop when an official source directly answers the question, additional sources repeat the same fact, remaining uncertainty does not affect the decision, or the user asked for a quick lookup.
 
-### Quick lookup: error
+Continue when sources conflict, the impact is high-stakes, the first source is old/unofficial/incomplete, version compatibility is unclear, or the user asked for a deep dive.
 
-Task:
-
-```text
-Fix a Next.js hydration mismatch.
-```
-
-Action:
-
-```text
-firecrawl_search "\"Hydration failed because the initial UI does not match\" Next.js"
-→ scrape official docs or strongest GitHub issue
-→ return likely cause, fix, and source
-→ stop
-```
-
-### Quick lookup: API
-
-Task:
-
-```text
-What is the signature for React useActionState?
-```
-
-Action:
-
-```text
-firecrawl_search "site:react.dev useActionState"
-→ firecrawl_scrape exact React API page
-→ return signature, parameters, caveats, and source
-→ stop
-```
-
-### Docs navigation
-
-Task:
-
-```text
-Find the Vite migration guide for the current major version.
-```
-
-Action:
-
-```text
-firecrawl_map "https://vite.dev/guide/"
-→ identify migration or release page
-→ firecrawl_scrape exact page
-→ summarize relevant breaking changes
-```
-
-### Deep research
-
-Task:
-
-```text
-Investigate the best state management option for our Next.js app.
-```
-
-Action:
-
-```text
-inspect package.json and existing app structure
-→ firecrawl_search official docs for candidate libraries
-→ firecrawl_scrape docs, changelogs, and migration notes
-→ firecrawl_search GitHub issues and community sentiment
-→ synthesize .pi/research/research-brief-state-management.md
-```
+If not found or retrieval fails, say `NOT FOUND` or `[not verified]`, list what was checked, and suggest the next best search path.
