@@ -111,6 +111,16 @@ all database changes, then all APIs, then all UI, unless explicitly approved.
 
 ## Communication
 
+### Reporting style
+
+Be extremely concise when reporting information. Prefer bullets/fragments over polished prose. Sacrifice grammar for concision when meaning stays clear; never sacrifice accuracy, evidence, caveats, or safety.
+
+Avoid:
+* Long preambles.
+* Polished transitions.
+* Repeating the request.
+* Explaining obvious steps.
+
 ### Decisions
 
 Handle trivial decisions automatically:
@@ -289,4 +299,3 @@ Use persistence for implementation, verification, and careful iteration. Do not 
 persistence to continue on a wrong problem caused by an unresolved high-level decision.
 
 Clarify the **what** before optimizing the **how**.
-
