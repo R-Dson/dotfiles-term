@@ -105,7 +105,12 @@ MiniDeps.add('nvim-lua/plenary.nvim')
 MiniDeps.add('onsails/lspkind.nvim')
 MiniDeps.add('nvim-tree/nvim-web-devicons')
 MiniDeps.add('MunifTanjim/nui.nvim')
-MiniDeps.add('saghen/blink.cmp')
+
+MiniDeps.add({
+  source = 'saghen/blink.cmp',
+  checkout = 'v1',
+})
+
 MiniDeps.add('MeanderingProgrammer/render-markdown.nvim')
 MiniDeps.add('akinsho/toggleterm.nvim')
 MiniDeps.add('folke/todo-comments.nvim')
