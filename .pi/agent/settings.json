@@ -18,7 +18,8 @@
     "npm:@benvargas/pi-firecrawl",
     "npm:pi-codebase-memory",
     "npm:pi-modes",
-    "npm:pi-lens"
+    "npm:pi-lens",
+    "git:github.com/DietrichGebert/ponytail"
   ],
   "terminal": {
     "showImages": true
