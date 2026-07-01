@@ -254,6 +254,33 @@ EOF
     success "Fisher and all plugins installed"
 }
 
+install_tmux() {
+    if ! command -v tmux &>/dev/null; then
+        ensure_brew && brew install tmux
+    fi
+
+    success "tmux ready"
+}
+
+install_tmux_config() {
+    local tmux_config="$HOME/.config/tmux"
+    local tmux_conf="$tmux_config/tmux.conf"
+    local legacy_tmux_conf="$HOME/.tmux.conf"
+
+    backup_and_prepare "$tmux_config"
+
+    download "$DOTFILES/tmux/tmux.conf" "$tmux_conf"
+
+    # Keep compatibility with tmux setups that still read ~/.tmux.conf
+    if [ -e "$legacy_tmux_conf" ] || [ -L "$legacy_tmux_conf" ]; then
+        cp "$legacy_tmux_conf" "${legacy_tmux_conf}.bak" 2>/dev/null || true
+    fi
+
+    ln -sf "$tmux_conf" "$legacy_tmux_conf" 2>/dev/null || cp "$tmux_conf" "$legacy_tmux_conf"
+
+    success "tmux config installed"
+}
+
 install_ghostty() {
     if command -v ghostty &>/dev/null; then
         success "Ghostty already installed"
@@ -380,6 +407,9 @@ main() {
     run_step "Install Fish shell?" "Fish" install_fish
     run_step "Install Fish config?" "Fish config" install_fish_config
     run_step "Install Fisher and Fish plugins?" "Fisher & plugins" install_fisher_plugins
+
+    run_step "Install tmux?" "tmux" install_tmux
+    run_step "Install tmux config?" "tmux config" install_tmux_config
 
     run_step "Install Ghostty?" "Ghostty" install_ghostty
     run_step "Install Ghostty config?" "Ghostty config" install_ghostty_config
