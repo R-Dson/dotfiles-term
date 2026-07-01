@@ -210,10 +210,31 @@ install_fonts() {
 }
 
 install_fish() {
-    ensure_fish
+    ensure_fish || return 1
 
-    info "To set Fish as your system default shell: chsh -s \$(which fish)"
-    success "Fish ready"
+    local fish_path
+    fish_path="$(command -v fish)"
+
+    if [ -z "$fish_path" ]; then
+        error "Fish was installed but could not be found in PATH."
+        return 1
+    fi
+
+    if ! grep -qx "$fish_path" /etc/shells 2>/dev/null; then
+        info "Adding Fish to /etc/shells"
+        echo "$fish_path" | sudo tee -a /etc/shells >/dev/null
+    fi
+
+    if [ "$SHELL" != "$fish_path" ]; then
+        info "Changing default shell to Fish"
+        chsh -s "$fish_path" || {
+            error "Could not change default shell automatically."
+            info "Run manually: chsh -s $fish_path"
+            return 0
+        }
+    fi
+
+    success "Fish ready and set as default shell"
 }
 
 install_fish_config() {
@@ -271,14 +292,25 @@ install_tmux_config() {
 
     download "$DOTFILES/tmux/tmux.conf" "$tmux_conf"
 
+    if command -v fish &>/dev/null; then
+        {
+            echo
+            echo "# Default shell"
+            echo "set -g default-shell $(command -v fish)"
+            echo "set -g default-command $(command -v fish)"
+        } >> "$tmux_conf"
+
+        success "tmux config installed; fish set as tmux default shell"
+    else
+        success "tmux config installed; fish not found, so tmux default shell was not changed"
+    fi
+
     # Keep compatibility with tmux setups that still read ~/.tmux.conf
     if [ -e "$legacy_tmux_conf" ] || [ -L "$legacy_tmux_conf" ]; then
         cp "$legacy_tmux_conf" "${legacy_tmux_conf}.bak" 2>/dev/null || true
     fi
 
     ln -sf "$tmux_conf" "$legacy_tmux_conf" 2>/dev/null || cp "$tmux_conf" "$legacy_tmux_conf"
-
-    success "tmux config installed"
 }
 
 install_ghostty() {
@@ -404,7 +436,7 @@ main() {
     run_step "Set up Homebrew?" "Homebrew" setup_homebrew
     run_step "Install Aporetic Nerd Font?" "Fonts" install_fonts
 
-    run_step "Install Fish shell?" "Fish" install_fish
+    run_step "Install Fish shell and set as default?" "Fish" install_fish
     run_step "Install Fish config?" "Fish config" install_fish_config
     run_step "Install Fisher and Fish plugins?" "Fisher & plugins" install_fisher_plugins
 
