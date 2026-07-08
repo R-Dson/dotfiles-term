@@ -1,4 +1,8 @@
 {
+  "chat.tools.terminal.autoApprove": {
+    "git remote get-url": true,
+    "git branch --show-current": true
+  },
   "window.titleBarStyle": "custom",
   "update.mode": "none",
   "workbench.colorTheme": "Dracula Refined",
