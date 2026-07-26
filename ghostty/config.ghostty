@@ -1,4 +1,3 @@
-# --- Font & Size ---
 font-family = "AporeticSansMonoNerdFont"
 font-size = 11
 
@@ -13,25 +12,25 @@ background = #282a36
 foreground = #f8f8f2
 cursor-color = #f8f8f2
 
-palette = 0=#bd93f9
+palette = 0=#44475a
 palette = 1=#ff5555
 palette = 2=#50fa7b
-palette = 3=#ff79c6
-palette = 4=#8be9fd
-palette = 5=#f1fa8c
-palette = 6=#6272a4
-palette = 7=#44475a
+palette = 3=#f1fa8c
+palette = 4=#bd93f9
+palette = 5=#ff79c6
+palette = 6=#8be9fd
+palette = 7=#f8f8f2
 
-palette = 8=#bd93f9
+palette = 8=#6272a4
 palette = 9=#ff5555
 palette = 10=#50fa7b
-palette = 11=#ff79c6
-palette = 12=#8be9fd
-palette = 13=#f1fa8c
-palette = 14=#6272a4
-palette = 15=#44475a
+palette = 11=#f1fa8c
+palette = 12=#bd93f9
+palette = 13=#ff79c6
+palette = 14=#8be9fd
+palette = 15=#f8f8f2
 
 command = "$(which fish)"
 
 window-decoration = false 
-gtk-titlebar-style = tabs
+#gtk-titlebar-style = tabs
