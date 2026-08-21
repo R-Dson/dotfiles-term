@@ -1,0 +1,267 @@
+{
+  // --- UI & THEME ---
+  "icon_theme": "Soft Charmed Icons",
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Dracula Flat"
+  },
+  "ui_font_size": 16.0,
+  "agent_ui_font_size": 16.0,
+  "buffer_font_size": 15.0,
+  "agent_buffer_font_size": 15.0,
+  "buffer_font_family": "AporeticSansMonoNerdFont",
+  "buffer_line_height": {
+    "custom": 1.3
+  },
+  "title_bar": {
+    "show_onboarding_banner": false,
+    "show_project_items": false,
+    "show_sign_in": false
+  },
+  "toolbar": {
+    "quick_actions": false
+  },
+
+  // --- EDITOR & VIM EXPERIENCE ---
+  "vim_mode": true,
+  "base_keymap": "VSCode",
+  "multi_cursor_modifier": "cmd_or_ctrl",
+  "cursor_blink": false,
+  "relative_line_numbers": "enabled",
+  "colorize_brackets": true,
+  "tab_size": 4,
+  "hard_tabs": false,
+  "show_whitespaces": "none",
+  "seed_search_query_from_cursor": "never",
+  "diff_view_style": "unified",
+  "code_lens": "on",
+
+  // --- SAVING & FORMATTING ---
+  "format_on_save": "on",
+  "autosave": "on_focus_change",
+
+  // --- INLAY HINTS ---
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true
+  },
+
+  // --- PANELS & GUTTER ---
+  "project_panel": {
+    "dock": "left",
+    "default_width": 300,
+    "hide_root": true,
+    "auto_fold_dirs": false,
+    "sticky_scroll": false
+  },
+  "outline_panel": {
+    "dock": "right",
+    "default_width": 300
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "button": false
+  },
+  "file_finder": {
+    "modal_max_width": "medium"
+  },
+  "gutter": {
+    "min_line_number_digits": 0,
+    "folds": false,
+    "runnables": false
+  },
+
+  // --- TERMINAL ---
+  "terminal": {
+    "font_size": 15.0,
+    "font_family": "AporeticSansMonoNerdFont",
+    "dock": "bottom",
+    "cursor_shape": "bar",
+    "detect_venv": {
+      "on": {
+        "directories": [".venv", "venv", "env", ".env"],
+        "activate_script": "default"
+      }
+    }
+  },
+
+  // --- TELEMETRY ---
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+    "anthropic_retention": false
+  },
+
+  // --- AI: EDIT PREDICTIONS (FIM / INLINE AUTOCOMPLETE) ---
+  "edit_predictions": {
+    "provider": "open_ai_compatible_api",
+    "mode": "eager",
+    "open_ai_compatible_api": {
+      "api_url": "http://localhost:8080/v1/completions",
+      "model": "qwen3.8-27b",
+      "prompt_format": "infer",
+      "max_output_tokens": 512
+    }
+  },
+
+  // --- AI: AGENT / ASSISTANT PANEL ---
+  "agent_servers": {
+    "github-copilot-cli": {
+      "type": "registry"
+    }
+  },
+  "agent": {
+    "sidebar_side": "right",
+    "dock": "right",
+    "flexible": false,
+    "default_width": 600,
+    "default_profile": "plan",
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-5.6-terra",
+      "effort": "high",
+      "enable_thinking": true
+    },
+    "tool_permissions": {
+      "default": "allow",
+      "tools": {
+        "terminal": {
+          "default": "confirm",
+          "always_allow": [
+            { "pattern": "^cargo\\s+(build|test|check)" },
+            { "pattern": "^go\\s+(test|build|vet)" },
+            { "pattern": "^pytest" },
+            { "pattern": "^ruff\\s+(check|format)" }
+          ]
+        }
+      }
+    },
+    "profiles": {
+      "plan": {
+        "name": "Plan",
+        "default_model": {
+          "provider": "openai",
+          "model": "qwen3.8-27b",
+          "effort": "high",
+          "enable_thinking": true
+        },
+        "tools": {
+          "move_path": false,
+          "copy_path": true,
+          "create_directory": false,
+          "diagnostics": true,
+          "fetch": true,
+          "find_path": true,
+          "grep": true,
+          "list_directory": true,
+          "now": true,
+          "terminal": true,
+          "thinking": true,
+          "read_file": true,
+          "open": true
+        },
+        "enable_all_context_servers": true,
+        "context_servers": {}
+      },
+      "all": {
+        "name": "All",
+        "default_model": {
+          "provider": "openai",
+          "model": "qwen3.8-27b",
+          "effort": "xhigh",
+          "enable_thinking": true
+        },
+        "tools": {
+          "copy_path": false
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {}
+      }
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
+
+  // --- LANGUAGE MODELS PROVIDERS ---
+  "language_models": {
+    "openai": {
+      "api_url": "http://localhost:8080/v1",
+      "available_models": [
+        {
+          "name": "qwen3.8-27b",
+          "display_name": "qwen3.8-27b",
+          "max_tokens": 150000
+        }
+      ]
+    }
+  },
+
+  // --- LANGUAGE-SPECIFIC SETTINGS ---
+  "languages": {
+    "Python": {
+      "language_servers": [
+        "ty",
+        "ruff",
+        "!basedpyright",
+        "!pyright"
+      ],
+      "preferred_line_length": 100,
+      "tab_size": 4,
+      "formatter": {
+        "language_server": {
+          "name": "ruff"
+        }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+        "source.fixAll.ruff": true
+      }
+    }
+  },
+
+  // --- LANGUAGE SERVER CONFIGURATIONS (LSP) ---
+  "lsp": {
+    "gopls": {
+      "initialization_options": {
+        "codelenses": {
+          "test": true,
+          "generate": true,
+          "regenerate_cgo": true,
+          "tidy": true,
+          "upgrade_dependency": true,
+          "vendor": true
+        },
+        "hints": {
+          "assignVariableTypes": true,
+          "compositeLiteralFields": true,
+          "compositeLiteralTypes": true,
+          "constantValues": true,
+          "functionTypeParameters": true,
+          "parameterNames": true,
+          "rangeVariableTypes": true
+        }
+      }
+    },
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "lineLength": 100,
+          "lint": {
+            "extendSelect": ["I"]
+          }
+        }
+      }
+    },
+    "ty": {
+      "binary": {
+        "path": "ty",
+        "arguments": ["server"]
+      }
+    }
+  }
+}
