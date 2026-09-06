@@ -1,19 +1,35 @@
 {
 	"providers": {
-    "llama-server": {
-      "baseUrl": "http://localhost:8080/v1",
-      "api": "openai-completions",
-      "apiKey": "ANTHROPIC_AUTH_TOKEN",
-      "compat": {
-        "supportsDeveloperRole": false,
-        "supportsReasoningEffort": false
-      },
-      "models": [
-        {
-          "id": "gemma-4-31B:IQ4_XS",
-          "reasoning": true
-        }
-      ]
-    }
-  }
+		"llama-server": {
+			"baseUrl": "http://localhost:8080/v1",
+			"api": "openai-completions",
+	    	"apiKey": "AUTH_TOKEN",
+			"models": [
+				{
+					"id": "gemma-4-31B:IQ4_XS",
+					"reasoning": true
+				}
+			]
+		},
+		"llama-docker": {
+			"baseUrl": "http://192.168.0.13:18020/v1",
+			"api": "openai-completions",
+			"apiKey": "AUTH_TOKEN",
+			"models": [
+				{
+					"id": "qwen3.8-27b",
+					"reasoning": true
+				}
+			]
+		},
+		"zai": {
+			"modelOverrides": {
+				"glm-5.3-flash": {
+					"thinkingLevelMap": {
+						"xhigh": "max"
+					}
+				}
+			}
+		}
+	}
 }
