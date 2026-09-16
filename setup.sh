@@ -324,6 +324,29 @@ install_ghostty_config() {
     fi
 }
 
+install_zed() {
+    if command -v zed &>/dev/null; then
+        success "Zed already installed"
+        return 0
+    fi
+
+    if curl -f https://zed.dev/install.sh | sh; then
+        success "Zed ready"
+    else
+        error "Failed to install Zed."
+        return 1
+    fi
+}
+
+install_zed_config() {
+    local zed_config="$HOME/.config/zed"
+
+    backup_and_prepare "$zed_config"
+    download "$DOTFILES/zed/settings.json" "$zed_config/settings.json"
+
+    success "Zed settings installed"
+}
+
 install_vscode_config() {
     local vscode_config
 
@@ -424,6 +447,9 @@ main() {
 
     run_step "Install Ghostty?" "Ghostty" install_ghostty
     run_step "Install Ghostty config?" "Ghostty config" install_ghostty_config
+
+    run_step "Install Zed?" "Zed" install_zed
+    run_step "Install Zed config?" "Zed config" install_zed_config
 
     run_step "Install VS Code config?" "VS Code config" install_vscode_config
 
