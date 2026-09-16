@@ -1,0 +1,110 @@
+# Herdr config — keybinding layout mirrors ~/.config/tmux/tmux.conf
+# (backup of the previous theme-only config: config.toml.bak-tmux-mirror)
+onboarding = false
+
+[theme]
+name = "terminal"
+auto_switch = false
+
+# Blue accent, like the tmux status line
+[ui]
+accent = "blue"
+# tmux: status-position top
+tab_bar_position = "top"
+# tmux: prefix+c / C create windows/sessions immediately, no name prompt
+prompt_new_tab_name = false
+# tmux: kill-window / kill-session are unconditional
+confirm_close = false
+# Pane chrome: bordered panes with 1-cell gaps (Herdr default look)
+pane_gaps = true
+pane_borders = true
+# After updating Herdr past v0.8.0 (ui.pane_outer_borders landed in PR #2535,
+# merged 2026-08-08): replace the two pane_* lines above with these two —
+# shared inner split lines, no outer frame (tmux-style):
+# pane_gaps = false
+# pane_outer_borders = false
+
+[ui.sidebar.agents]
+# tmux: automatic-rename-format '#{b:pane_current_path}' — the shell reports the
+# current directory as the terminal title (fish does this by default); this
+# token shows it live per pane (v0.8.0: agents rows only, not space rows).
+# The top tab bar shows tab names only.
+rows = [["state_icon", "workspace", "tab"], ["terminal_title_stripped", "agent"]]
+
+[terminal]
+# bare name: Herdr resolves it via the server's PATH (src/pane.rs)
+default_shell = "fish"
+# tmux: -c "#{pane_current_path}" on split-window/new-window/new-session
+new_cwd = "follow"
+
+[keys]
+# tmux: prefix C-Space. Herdr has one prefix (tmux's prefix2 C-b is dropped).
+prefix = "ctrl+space"
+
+# --- Sessions / workspaces (tmux: C=new, K=kill, R=rename, P/N=switch, M-Up/Down=switch)
+new_workspace = "prefix+shift+c" # tmux C (frees Herdr's default prefix+shift+n for next_workspace)
+close_workspace = "prefix+shift+k" # tmux K
+rename_workspace = "prefix+shift+r" # tmux R
+next_workspace = ["prefix+shift+n", "alt+down"] # tmux N / M-Down
+previous_workspace = ["prefix+shift+p", "alt+up"] # tmux P / M-Up
+
+# --- Agent panel cycling: focus the next/previous row in the sidebar.
+# Free chords: Ghostty binds ctrl+shift+page_up/down, not ctrl+shift+arrows.
+next_agent = "ctrl+shift+down"
+previous_agent = "ctrl+shift+up"
+
+# --- Reload / detach. tmux: prefix+q reloads config, detach is double-prefix.
+reload_config = "prefix+q" # displaces Herdr's default detach on prefix+q
+detach = "prefix+d" # classic tmux detach key
+
+# --- Panes (tmux: h=split below, v=split right, x=kill-pane, C-M-<dir>=focus)
+split_horizontal = "prefix+h" # tmux h (split -v, pane below); displaces default prefix+minus
+# split_vertical = "prefix+v" is already the Herdr default (tmux v: pane to the right)
+# close_pane = "prefix+x" is already the Herdr default (tmux x)
+# tmux C-M-<dir>: direct chords, no prefix. Setting these drops Herdr's default
+# prefix+h/j/k/l focus bindings, exactly like tmux.
+focus_pane_left = "ctrl+alt+left"
+focus_pane_down = "ctrl+alt+down"
+focus_pane_up = "ctrl+alt+up"
+focus_pane_right = "ctrl+alt+right"
+# tmux C-M-S-<dir> resize-pane 5 is handled by [[keys.command]] below.
+
+# --- Tabs (tmux: c=new, k=kill, r=rename, M-1..9, M-<dir>=switch)
+# new_tab = "prefix+c" is already the Herdr default (tmux c)
+rename_tab = "prefix+r" # tmux r (frees Herdr's default resize-mode binding on prefix+r)
+close_tab = "prefix+k" # tmux k (Herdr default is prefix+shift+x)
+next_tab = ["prefix+n", "alt+right", "alt+shift+right", "ctrl+shift+right"] # tmux M-Right / M-S-Right / C-S-Right
+previous_tab = ["prefix+p", "alt+left", "alt+shift+left", "ctrl+shift+left"] # tmux M-Left / M-S-Left / C-S-Left
+# tmux M-1..9, plus the Herdr default prefix+1..9 kept in parallel
+switch_tab = ["prefix+1..9", "alt+1..9"]
+
+# --- Copy mode: nothing to set. Herdr copy mode (prefix+[) is vi-style with
+# v/Space select and y/Enter copy, matching tmux mode-keys vi + v + y.
+
+# tmux C-M-S-<dir> resize-pane 5: Herdr has no direct resize action, so these
+# shell out to the CLI (runs detached in the background).
+# Chords mirror tmux exactly: M-<dir> / M-S-<dir> / C-S-<dir> switch tabs,
+# C-M-<dir> focuses panes, C-M-S-<dir> resizes.
+[[keys.command]]
+key = "ctrl+alt+shift+left"
+type = "shell"
+command = "herdr pane resize --direction left --amount 5 --current"
+description = "resize pane left by 5 (tmux C-M-S-Left)"
+
+[[keys.command]]
+key = "ctrl+alt+shift+down"
+type = "shell"
+command = "herdr pane resize --direction down --amount 5 --current"
+description = "resize pane down by 5 (tmux C-M-S-Down)"
+
+[[keys.command]]
+key = "ctrl+alt+shift+up"
+type = "shell"
+command = "herdr pane resize --direction up --amount 5 --current"
+description = "resize pane up by 5 (tmux C-M-S-Up)"
+
+[[keys.command]]
+key = "ctrl+alt+shift+right"
+type = "shell"
+command = "herdr pane resize --direction right --amount 5 --current"
+description = "resize pane right by 5 (tmux C-M-S-Right)"
