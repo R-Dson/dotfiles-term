@@ -275,42 +275,21 @@ EOF
     success "Fisher and all plugins installed"
 }
 
-install_tmux() {
-    if ! command -v tmux &>/dev/null; then
-        ensure_brew && brew install tmux
+install_herdr() {
+    if ! command -v herdr &>/dev/null; then
+        ensure_brew && brew install herdr
     fi
 
-    success "tmux ready"
+    success "herdr ready"
 }
 
-install_tmux_config() {
-    local tmux_config="$HOME/.config/tmux"
-    local tmux_conf="$tmux_config/tmux.conf"
-    local legacy_tmux_conf="$HOME/.tmux.conf"
+install_herdr_config() {
+    local herdr_config="$HOME/.config/herdr"
 
-    backup_and_prepare "$tmux_config"
+    backup_and_prepare "$herdr_config"
+    download "$DOTFILES/herdr/config.toml" "$herdr_config/config.toml"
 
-    download "$DOTFILES/tmux/tmux.conf" "$tmux_conf"
-
-    if command -v fish &>/dev/null; then
-        {
-            echo
-            echo "# Default shell"
-            echo "set -g default-shell $(command -v fish)"
-            echo "set -g default-command $(command -v fish)"
-        } >> "$tmux_conf"
-
-        success "tmux config installed; fish set as tmux default shell"
-    else
-        success "tmux config installed; fish not found, so tmux default shell was not changed"
-    fi
-
-    # Keep compatibility with tmux setups that still read ~/.tmux.conf
-    if [ -e "$legacy_tmux_conf" ] || [ -L "$legacy_tmux_conf" ]; then
-        cp "$legacy_tmux_conf" "${legacy_tmux_conf}.bak" 2>/dev/null || true
-    fi
-
-    ln -sf "$tmux_conf" "$legacy_tmux_conf" 2>/dev/null || cp "$tmux_conf" "$legacy_tmux_conf"
+    success "herdr config installed"
 }
 
 install_ghostty() {
@@ -440,8 +419,8 @@ main() {
     run_step "Install Fish config?" "Fish config" install_fish_config
     run_step "Install Fisher and Fish plugins?" "Fisher & plugins" install_fisher_plugins
 
-    run_step "Install tmux?" "tmux" install_tmux
-    run_step "Install tmux config?" "tmux config" install_tmux_config
+    run_step "Install herdr?" "herdr" install_herdr
+    run_step "Install herdr config?" "herdr config" install_herdr_config
 
     run_step "Install Ghostty?" "Ghostty" install_ghostty
     run_step "Install Ghostty config?" "Ghostty config" install_ghostty_config
