@@ -1,55 +1,27 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
 {
-  // --- UI & THEME ---
+  "ui_font_family": ".ZedSans",
   "icon_theme": "Soft Charmed Icons",
-  "theme": {
-    "mode": "system",
-    "light": "One Light",
-    "dark": "Dracula Flat"
+  "terminal": {
+    "font_size": 15.0,
+    "font_family": "AporeticSansMonoNerdFont"
   },
-  "ui_font_size": 16.0,
-  "agent_ui_font_size": 16.0,
-  "buffer_font_size": 15.0,
-  "agent_buffer_font_size": 15.0,
-  "buffer_font_family": "AporeticSansMonoNerdFont",
-  "buffer_line_height": {
-    "custom": 1.3
-  },
-  "title_bar": {
-    "show_onboarding_banner": false,
-    "show_project_items": false,
-    "show_sign_in": false
-  },
-  "toolbar": {
-    "quick_actions": false
-  },
-
-  // --- EDITOR & VIM EXPERIENCE ---
-  "vim_mode": true,
-  "base_keymap": "VSCode",
-  "multi_cursor_modifier": "cmd_or_ctrl",
-  "cursor_blink": false,
-  "relative_line_numbers": "enabled",
-  "colorize_brackets": true,
-  "tab_size": 4,
-  "hard_tabs": false,
-  "show_whitespaces": "none",
-  "seed_search_query_from_cursor": "never",
   "diff_view_style": "unified",
-  "code_lens": "on",
-
-  // --- SAVING & FORMATTING ---
-  "format_on_save": "on",
-  "autosave": "on_focus_change",
-
-  // --- INLAY HINTS ---
-  "inlay_hints": {
-    "enabled": true,
-    "show_type_hints": true,
-    "show_parameter_hints": true,
-    "show_other_hints": true
+  "agent_servers": {
+    "github-copilot-cli": {
+      "type": "registry"
+    }
   },
-
-  // --- PANELS & GUTTER ---
+  "edit_predictions": {
+    "provider": "open_ai_compatible_api"
+  },
   "project_panel": {
     "dock": "left",
     "default_width": 300,
@@ -61,95 +33,38 @@
     "dock": "right",
     "default_width": 300
   },
-  "git_panel": {
-    "dock": "left"
-  },
-  "collaboration_panel": {
-    "button": false
-  },
   "file_finder": {
     "modal_max_width": "medium"
   },
+
   "gutter": {
     "min_line_number_digits": 0,
     "folds": false,
     "runnables": false
   },
-
-  // --- TERMINAL ---
-  "terminal": {
-    "font_size": 15.0,
-    "font_family": "AporeticSansMonoNerdFont",
-    "dock": "bottom",
-    "cursor_shape": "bar",
-    "detect_venv": {
-      "on": {
-        "directories": [".venv", "venv", "env", ".env"],
-        "activate_script": "default"
-      }
-    }
+  "collaboration_panel": {
+    "button": false,
+    "dock": null
   },
-
-  // --- TELEMETRY ---
-  "telemetry": {
-    "diagnostics": false,
-    "metrics": false,
-    "anthropic_retention": false
+  "git_panel": {
+    "dock": "left"
   },
-
-  // --- AI: EDIT PREDICTIONS (FIM / INLINE AUTOCOMPLETE) ---
-  "edit_predictions": {
-    "provider": "open_ai_compatible_api",
-    "mode": "eager",
-    "open_ai_compatible_api": {
-      "api_url": "http://localhost:8080/v1/completions",
-      "model": "qwen3.8-27b",
-      "prompt_format": "infer",
-      "max_output_tokens": 512
-    }
-  },
-
-  // --- AI: AGENT / ASSISTANT PANEL ---
-  "agent_servers": {
-    "github-copilot-cli": {
-      "type": "registry"
-    }
+  //"buffer_font_weight": 500.0,
+  //"ui_font_family": "IBM Plex Sans",
+  "buffer_line_height": {
+    "custom": 1.3
   },
   "agent": {
     "sidebar_side": "right",
+    "favorite_models": [
+    ],
     "dock": "right",
     "flexible": false,
     "default_width": 600,
-    "default_profile": "plan",
-    "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-5.6-terra",
-      "effort": "high",
-      "enable_thinking": true
-    },
-    "tool_permissions": {
-      "default": "allow",
-      "tools": {
-        "terminal": {
-          "default": "confirm",
-          "always_allow": [
-            { "pattern": "^cargo\\s+(build|test|check)" },
-            { "pattern": "^go\\s+(test|build|vet)" },
-            { "pattern": "^pytest" },
-            { "pattern": "^ruff\\s+(check|format)" }
-          ]
-        }
-      }
-    },
+    "default_profile": "write",
     "profiles": {
       "plan": {
         "name": "Plan",
-        "default_model": {
-          "provider": "openai",
-          "model": "qwen3.8-27b",
-          "effort": "high",
-          "enable_thinking": true
-        },
         "tools": {
           "move_path": false,
           "copy_path": true,
@@ -169,13 +84,13 @@
         "context_servers": {}
       },
       "all": {
-        "name": "All",
         "default_model": {
           "provider": "openai",
           "model": "qwen3.8-27b",
           "effort": "xhigh",
           "enable_thinking": true
         },
+        "name": "All",
         "tools": {
           "copy_path": false
         },
@@ -183,73 +98,91 @@
         "context_servers": {}
       }
     },
-    "favorite_models": [],
+    "default_model": {
+      "enable_thinking": false,
+      "provider": "llama.cpp",
+      "model": "Qwen3.8-27B"
+    },
     "model_parameters": []
   },
+  "vim_mode": true,
+  "base_keymap": "VSCode",
 
-  // --- LANGUAGE MODELS PROVIDERS ---
-  "language_models": {
-    "openai": {
-      "api_url": "http://localhost:8080/v1",
-      "available_models": [
-        {
-          "name": "qwen3.8-27b",
-          "display_name": "qwen3.8-27b",
-          "max_tokens": 150000
-        }
-      ]
-    }
+  "multi_cursor_modifier": "cmd_or_ctrl",
+  "cursor_blink": false,
+  //"buffer_font_family": "FiraCode Nerd Font Mono",
+  //"buffer_font_family": ".ZedMono",
+  //"buffer_font_family": "JetBrainsMonoNL Nerd Font",
+  "buffer_font_family": "AporeticSansMonoNerdFont",
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+    "anthropic_retention": false
   },
-
-  // --- LANGUAGE-SPECIFIC SETTINGS ---
+  "title_bar": {
+    "show_onboarding_banner": false,
+    "show_project_items": false,
+    "show_sign_in": false
+    //"show_user_menu": false
+  },
+  "toolbar": {
+    "quick_actions": false
+  },
+  "ui_font_size": 17.0,
+  "agent_ui_font_size": 16.0,
+  "buffer_font_size": 15.0,
+  "agent_buffer_font_size": 15.0,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Dracula Flat"
+  },
   "languages": {
     "Python": {
       "language_servers": [
+        // Disable basedpyright and enable ty, and otherwise
+        // use the default configuration.
         "ty",
         "ruff",
         "!basedpyright",
         "!pyright"
       ],
       "preferred_line_length": 100,
-      "tab_size": 4,
-      "formatter": {
-        "language_server": {
-          "name": "ruff"
-        }
-      },
       "code_actions_on_format": {
         "source.organizeImports.ruff": true,
         "source.fixAll.ruff": true
       }
     }
   },
-
-  // --- LANGUAGE SERVER CONFIGURATIONS (LSP) ---
-  "lsp": {
-    "gopls": {
-      "initialization_options": {
-        "codelenses": {
-          "test": true,
-          "generate": true,
-          "regenerate_cgo": true,
-          "tidy": true,
-          "upgrade_dependency": true,
-          "vendor": true
-        },
-        "hints": {
-          "assignVariableTypes": true,
-          "compositeLiteralFields": true,
-          "compositeLiteralTypes": true,
-          "constantValues": true,
-          "functionTypeParameters": true,
-          "parameterNames": true,
-          "rangeVariableTypes": true
-        }
-      }
+  "language_models": {
+    "openai": {
+      "api_url": "http://localhost:8080/v1",
+      //"available_models": [
+      //  {
+      //    "name": "qwen3.8-27b",
+      //    "display_name": "qwen3.8-27b",
+      //    "max_tokens": 180000
+      //  }
+      //]
     },
+    "openai_compatible": {
+      "available_models": {
+        "api_url": "http://10.129.20.218:8000/v1",
+        "available_models": [
+          {
+            "name": "deepseek-v4-flash",
+            "display_name": "deepseek-v4-flash",
+            "max_tokens": 524288
+          }
+        ]
+      }
+    }
+  },
+  "lsp": {
     "ruff": {
       "initialization_options": {
         "settings": {
+          // Ruff server settings go here
           "lineLength": 100,
           "lint": {
             "extendSelect": ["I"]
@@ -259,9 +192,11 @@
     },
     "ty": {
       "binary": {
-        "path": "ty",
+        "path": "/home/linuxbrew/.linuxbrew/bin/ty",
         "arguments": ["server"]
       }
     }
-  }
-}
+  },
+ "seed_search_query_from_cursor": "never",
+ "show_whitespaces": "none"
+} 
