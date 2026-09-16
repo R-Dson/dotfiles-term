@@ -10,7 +10,7 @@ Interactive install:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/R-Dson/dotfiles-term/refs/heads/main-oma/setup.sh)"
-````
+```
 
 Fully automated install:
 
@@ -33,7 +33,9 @@ The script can install and configure:
 * **Aporetic Nerd Font** — terminal font, Echinoidea's Nerd Font patched variant
 * **Fish** — user-friendly shell
 * **Fisher** — Fish plugin manager and plugins
+* **herdr** — terminal workflow / process multiplexer
 * **Ghostty** — GPU-accelerated terminal emulator
+* **Zed** — high-performance code editor
 * **VS Code settings** — editor configuration
 * **Neovim** — text editor
 * **Codicons** — VS Code icon font package for editor/UI integrations
@@ -49,8 +51,15 @@ By default, the installer asks before each major step:
 ```text
 Set up Homebrew? [Y/n]
 Install Aporetic Nerd Font? [Y/n]
-Install Fish shell? [Y/n]
+Install Fish shell and set as default? [Y/n]
 Install Fish config? [Y/n]
+Install Fisher and Fish plugins? [Y/n]
+Install herdr? [Y/n]
+Install herdr config? [Y/n]
+Install Ghostty? [Y/n]
+Install Ghostty config? [Y/n]
+Install Zed? [Y/n]
+Install Zed config? [Y/n]
 ...
 ```
 
@@ -66,7 +75,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/R-Dson/dotfiles-term/ref
 
 After the script finishes, restart your terminal.
 
-To set Fish as your system default shell:
+To set Fish as your system default shell manually (if not done by the installer):
 
 ```bash
 chsh -s $(which fish)
@@ -80,8 +89,10 @@ For example:
 
 ```text
 ~/.config/fish.bak
-~/.config/nvim.bak
+~/.config/herdr.bak
 ~/.config/ghostty.bak
+~/.config/zed.bak
+~/.config/nvim.bak
 ```
 
 ### Fish Shell
@@ -127,6 +138,20 @@ To reconfigure Tide:
 tide configure
 ```
 
+### herdr
+
+Installed via Homebrew:
+
+```bash
+brew install herdr
+```
+
+Config installed to:
+
+```text
+~/.config/herdr/config.toml
+```
+
 ### Ghostty Terminal
 
 Config installed to:
@@ -138,6 +163,20 @@ Config installed to:
 If Fish is installed, the script appends Fish as Ghostty’s default command unless the Ghostty config already defines a `command`.
 
 This enables [automatic shell integration](https://ghostty.org/docs/features/shell-integration) with no extra setup.
+
+### Zed
+
+Installed via official script:
+
+```bash
+curl -f https://zed.dev/install.sh | sh
+```
+
+Settings installed to:
+
+```text
+~/.config/zed/settings.json
+```
 
 ### VS Code
 
