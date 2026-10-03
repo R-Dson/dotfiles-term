@@ -65,7 +65,7 @@ assets/implementation-plan-template.md
    - Run or simulate the plan-review pass with `plan-document-reviewer-prompt.md`.
 
 6. **Save and hand off**
-   - Save to `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`.
+   - Save to `docs/plans/YYYY-MM-DD-<feature-name>.md`.
    - Offer subagent-driven or inline execution.
 
 ## Plan requirements
@@ -122,7 +122,7 @@ Common types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`.
 Before saving, check the plan for vague placeholders:
 
 ```bash
-grep -RniE "TBD|TODO|later|appropriate|as needed|etc\\.|placeholder" docs/superpowers/plans/
+grep -RniE "TBD|TODO|later|appropriate|as needed|etc\\.|placeholder" docs/plans/
 ```
 
 Also verify:
