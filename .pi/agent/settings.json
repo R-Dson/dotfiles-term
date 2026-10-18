@@ -1,7 +1,5 @@
 {
-  "lastChangelogVersion": "0.78.1",
-  "defaultProvider": "llama-server",
-  "defaultModel": "gemma-4-31B:IQ4_XS",
+  "lastChangelogVersion": "1.0.0",
   "theme": "dracula",
   "collapseChangelog": false,
   "doubleEscapeAction": "tree",
@@ -9,17 +7,13 @@
   "hideThinkingBlock": true,
   "enableInstallTelemetry": false,
   "packages": [
-    "npm:pi-ghostty",
     "npm:pi-extmgr",
-    "npm:pi-markdown-preview",
     "npm:pi-rewind",
     "npm:pi-updater",
     "npm:pi-ask-user",
     "npm:@benvargas/pi-firecrawl",
-    "npm:pi-codebase-memory",
-    "npm:pi-modes",
-    "npm:pi-lens",
-    "git:github.com/DietrichGebert/ponytail"
+    "npm:pi-acp-provider",
+    "npm:pi-lens"
   ],
   "terminal": {
     "showImages": true
